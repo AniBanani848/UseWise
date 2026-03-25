@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="bg">
+  <head>
+    <meta charset="utf-8" />
+    <title>Регистрация</title>
+  </head>
+  <body>
+    <h1>Регистрация</h1>
+    <form method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit">Регистрирай</button>
+    </form>
+    <p>
+      Имаш акаунт?
+      <a href="{% url 'accounts:login' %}">Влез</a>
+    </p>
+  </body>
+</html>
+
