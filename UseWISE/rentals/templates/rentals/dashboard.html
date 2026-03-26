@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Моите наеми | UseWISE{% endblock %}
+
+{% block content %}
+  <section class="card">
+    <h1>Моите наеми</h1>
+    {% if renter_rentals %}
+      <div class="grid">
+        {% for rental in renter_rentals %}
+          <article class="item">
+            <h3>{{ rental.item.title }}</h3>
+            <p><strong>Период:</strong> {{ rental.start_date }} - {{ rental.end_date }}</p>
+            <p><strong>Собственик:</strong> {{ rental.item.owner.first_name }} {{ rental.item.owner.last_name }}</p>
+            <p><strong>Статус:</strong> {{ rental.get_status_display }}</p>
+            <p><strong>Обща цена:</strong> {{ rental.total_price }} лв.</p>
+            <p><a href="{% url 'item_detail' rental.item.id %}">Към вещта</a></p>
+            {% if rental.status == "pending" %}
+              <form method="post" action="{% url 'rentals:cancel' rental.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-secondary">Отмени заявката</button>
+              </form>
+            {% endif %}
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p>Все още нямаш заявки за наем.</p>
+    {% endif %}
+  </section>
+
+  <section class="card">
+    <h2>Заявки към моите вещи</h2>
+    {% if owner_requests %}
+      <div class="grid">
+        {% for rental in owner_requests %}
+          <article class="item">
+            <h3>{{ rental.item.title }}</h3>
+            <p><strong>Наемател:</strong> {{ rental.renter.first_name }} {{ rental.renter.last_name }}</p>
+            <p><strong>Телефон:</strong> {{ rental.renter.phone }}</p>
+            <p><strong>Период:</strong> {{ rental.start_date }} - {{ rental.end_date }}</p>
+            <p><strong>Статус:</strong> {{ rental.get_status_display }}</p>
+            <p><strong>Обща цена:</strong> {{ rental.total_price }} лв.</p>
+            {% if rental.status == "pending" %}
+              <form method="post" action="{% url 'rentals:approve' rental.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary">Одобри</button>
+              </form>
+              <form method="post" action="{% url 'rentals:decline' rental.id %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-secondary">Откажи</button>
+              </form>
+            {% endif %}
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p>Все още няма входящи заявки към твоите вещи.</p>
+    {% endif %}
+  </section>
+{% endblock %}
