@@ -10,7 +10,7 @@ from django.views.generic import RedirectView
 from django.conf import settings
 from django.conf.urls.static import static
 
-from .views import home, items_placeholder
+from .views import home
 
 urlpatterns = [
     path("", home, name="home"),
