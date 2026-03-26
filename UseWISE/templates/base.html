@@ -165,6 +165,10 @@
         background: #fef3c7;
         color: #92400e;
       }
+      .messages .info {
+        background: #dbeafe;
+        color: #1d4ed8;
+      }
       .form-errors .errorlist {
         color: #991b1b;
         padding-left: 18px;
@@ -199,6 +203,7 @@
           <a href="/items/">Вещи</a>
           {% if user.is_authenticated %}
           <a href="{% url 'accounts:profile' %}">Профил</a>
+          <a href="{% url 'chat:list' %}">Чат</a>
           <a href="{% url 'rentals:dashboard' %}">Моите наеми</a>
           <form method="post" action="{% url 'accounts:logout' %}">
             {% csrf_token %}
