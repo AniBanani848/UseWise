@@ -19,7 +19,7 @@ def create_rental(request, item_id):
         messages.error(request, "Не можеш да заявиш собствената си вещ.")
         return redirect("item_detail", item_id=item.id)
 
-    form = RentalRequestForm(request.POST)
+    form = RentalRequestForm(request.POST, item=item)
     if form.is_valid():
         rental = form.save(commit=False)
         rental.item = item

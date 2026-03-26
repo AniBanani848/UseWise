@@ -31,7 +31,7 @@ def item_detail(request, item_id):
     ).select_related("renter")
     rental_form = None
     if request.user.is_authenticated and request.user != item.owner and item.available:
-        rental_form = RentalRequestForm()
+        rental_form = RentalRequestForm(item=item)
     return render(
         request,
         'item_detail.html',

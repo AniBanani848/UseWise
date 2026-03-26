@@ -38,6 +38,18 @@ class Rental(models.Model):
     def __str__(self):
         return f"{self.item.title} ({self.start_date} - {self.end_date})"
 
+    @classmethod
+    def overlapping_approved_queryset(cls, item, start_date, end_date, exclude_pk=None):
+        queryset = cls.objects.filter(
+            item=item,
+            status=cls.Status.APPROVED,
+            start_date__lte=end_date,
+            end_date__gte=start_date,
+        )
+        if exclude_pk is not None:
+            queryset = queryset.exclude(pk=exclude_pk)
+        return queryset
+
     @property
     def total_days(self):
         return (self.end_date - self.start_date).days + 1
@@ -65,12 +77,12 @@ class Rental(models.Model):
                 errors["item"] = "Тази вещ в момента не е налична за наемане."
 
         if not errors and self.item_id and self.start_date and self.end_date:
-            overlapping = Rental.objects.filter(
+            overlapping = self.overlapping_approved_queryset(
                 item=self.item,
-                status=self.Status.APPROVED,
-                start_date__lte=self.end_date,
-                end_date__gte=self.start_date,
-            ).exclude(pk=self.pk)
+                start_date=self.start_date,
+                end_date=self.end_date,
+                exclude_pk=self.pk,
+            )
             if overlapping.exists():
                 errors["start_date"] = "Има одобрен наем за част от избрания период."
 

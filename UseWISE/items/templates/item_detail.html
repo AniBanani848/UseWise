@@ -24,15 +24,16 @@
   </section>
 
   <section class="card">
-    <h2>Одобрени наеми</h2>
+    <h2>Заети периоди</h2>
     {% if approved_rentals %}
+      <p>Не можеш да заявиш наем за дати, които се припокриват със следните одобрени периоди:</p>
       <ul>
         {% for rental in approved_rentals %}
           <li>{{ rental.start_date }} - {{ rental.end_date }}{% if rental.is_current %} (в момента е нает){% endif %}</li>
         {% endfor %}
       </ul>
     {% else %}
-      <p>Все още няма одобрени наеми за тази вещ.</p>
+      <p>В момента няма одобрени наеми за тази вещ.</p>
     {% endif %}
   </section>
 

@@ -38,8 +38,9 @@ def signup_html(request):
         form = SignupForm(request.POST)
         if form.is_valid():
             user = form.save()
-            _send_verification_email(request, user)
-            return redirect("accounts:signup_done")
+            login(request, user)
+            messages.success(request, "Регистрацията е успешна. Добре дошли!")
+            return redirect(settings.LOGIN_REDIRECT_URL)
     else:
         form = SignupForm()
     return render(request, "accounts/signup.html", {"form": form})

@@ -117,6 +117,28 @@ class RentalFlowTests(TestCase):
         self.assertRedirects(response, reverse("item_detail", args=[self.item.id]))
         self.assertEqual(Rental.objects.count(), 1)
 
+    def test_same_day_overlap_with_approved_rental_is_rejected(self):
+        Rental.objects.create(
+            item=self.item,
+            renter=self.renter,
+            start_date=self.start_date,
+            end_date=self.end_date,
+            status=Rental.Status.APPROVED,
+        )
+        self.client.force_login(self.second_renter)
+
+        response = self.client.post(
+            reverse("rentals:create", args=[self.item.id]),
+            {
+                "start_date": self.end_date,
+                "end_date": self.end_date + timedelta(days=2),
+            },
+            follow=True,
+        )
+
+        self.assertContains(response, "Вещта вече е заета между")
+        self.assertEqual(Rental.objects.count(), 1)
+
     def test_dashboard_shows_renter_and_owner_sections(self):
         rental = Rental.objects.create(
             item=self.item,
