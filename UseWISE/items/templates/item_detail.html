@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h2>{{ item.title }}</h2>
+    
+    {% if item.image %}
+        <img src="{{ item.image.url }}" alt="{{ item.title }}" style="max-width: 300px; border-radius: 8px;">
+    {% endif %}
+
+    <p><strong>Описание:</strong></p>
+    <p>{{ item.description }}</p>
+    
+    <p><strong>Цена на ден:</strong> {{ item.price_per_day }} лв.</p>
+    <p><strong>Собственик:</strong> {{ item.owner.username }}</p>
+
+    <button style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">
+        Свържи се със собственика
+    </button>
+{% endblock %}
