@@ -41,12 +41,14 @@ def signup_html(request):
         form = SignupForm(request.POST)
         if form.is_valid():
             user = form.save()
-            _send_verification_email(request, user)
+            user.is_active = True
+            user.save()
+            login(request, user)
             messages.success(
                 request,
-                "Регистрацията е успешна. Провери имейла си за потвърждение.",
+                "Регистрацията е успешна. Добре дошли!",
             )
-            return redirect("accounts:signup_done")
+            return redirect(settings.LOGIN_REDIRECT_URL)
     else:
         form = SignupForm()
     return render(request, "accounts/signup.html", {"form": form})
@@ -56,7 +58,7 @@ def signup_html(request):
 def signup_done(request):
     return render(request, "accounts/signup_done.html")
 
-
+# 
 @require_GET
 def verify_email(request, uidb64, token):
     try:
@@ -86,9 +88,6 @@ def login_html(request):
         form = EmailLoginForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
-            if not user.is_active:
-                messages.error(request, "Потвърди имейла си преди вход.")
-                return render(request, "accounts/login.html", {"form": form})
             login(request, user)
             return redirect(settings.LOGIN_REDIRECT_URL)
     else:
@@ -130,12 +129,14 @@ def signup_api(request):
         )
 
     user = form.save()
-    _send_verification_email(request, user)
+    user.is_active = True
+    user.save()
+    login(request, user)
 
     return JsonResponse(
         {
             "ok": True,
-            "message": "Регистрацията е успешна. Провери имейла си за потвърждение.",
+            "message": "Регистрацията е успешна. Добре дошли!",
             "email": user.email,
         },
         status=201,
@@ -150,9 +151,6 @@ def login_api(request):
 
     if user is None:
         return JsonResponse({"ok": False, "message": "Невалиден имейл или парола."}, status=400)
-
-    if not user.is_active:
-        return JsonResponse({"ok": False, "message": "Потвърди имейла си преди вход."}, status=403)
 
     login(request, user)
     return JsonResponse({"ok": True, "message": "Успешен вход."})
