@@ -1,15 +1,14 @@
-<!doctype html>
-<html lang="bg">
-  <head>
-    <meta charset="utf-8" />
-    <title>Невалиден линк</title>
-  </head>
-  <body>
-    <h1>Невалиден или изтекъл линк</h1>
-    <p>Линкът за потвърждение не може да бъде използван.</p>
-    <p>
-      <a href="{% url 'accounts:signup' %}">Регистрация</a>
-    </p>
-  </body>
-</html>
+{% extends "base.html" %}
 
+{% block title %}Невалиден линк | UseWISE{% endblock %}
+
+{% block content %}
+  <section class="card">
+    <h1>Невалиден или изтекъл линк</h1>
+    <p>Линкът за потвърждение не може да се използва. Опитай отново регистрация или се свържи с поддръжка.</p>
+    <p class="actions">
+      <a href="{% url 'accounts:signup' %}">Нова регистрация</a>
+      <a href="/">Начало</a>
+    </p>
+  </section>
+{% endblock %}

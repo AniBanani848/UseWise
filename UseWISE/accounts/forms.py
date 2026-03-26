@@ -1,5 +1,6 @@
 from django import forms
 from django.contrib.auth import password_validation
+from django.contrib.auth.forms import AuthenticationForm
 from django.core.exceptions import ValidationError
 
 from .models import User
@@ -34,7 +35,6 @@ class SignupForm(forms.ModelForm):
 
     def clean_phone(self):
         phone = self.cleaned_data.get("phone") or ""
-        # Keep digits and leading '+' if provided
         phone = phone.strip().replace(" ", "").replace("-", "")
         if phone.startswith("+"):
             return "+" + "".join(ch for ch in phone[1:] if ch.isdigit())
@@ -46,7 +46,7 @@ class SignupForm(forms.ModelForm):
         password2 = cleaned_data.get("password2")
 
         if password1 and password2 and password1 != password2:
-            raise ValidationError("Passwords do not match.")
+            raise ValidationError("Паролите не съвпадат.")
 
         if password1:
             user = User(email=cleaned_data.get("email") or "temp@example.com")
@@ -56,7 +56,7 @@ class SignupForm(forms.ModelForm):
 
     def _create_user(self) -> User:
         user = super().save(commit=False)
-        user.is_active = False  # must confirm email first
+        user.is_active = False
         user.set_password(self.cleaned_data["password1"])
         user.save()
         return user
@@ -64,3 +64,54 @@ class SignupForm(forms.ModelForm):
     def save(self, commit=True):  # pragma: no cover
         return self._create_user()
 
+
+class EmailLoginForm(AuthenticationForm):
+    """Вход с имейл (USERNAME_FIELD на User е email)."""
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["username"].label = "Имейл"
+
+
+class ProfileEditForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ("first_name", "last_name", "country", "city_or_village", "phone")
+
+    def clean_phone(self):
+        phone = self.cleaned_data.get("phone") or ""
+        phone = phone.strip().replace(" ", "").replace("-", "")
+        if phone.startswith("+"):
+            phone = "+" + "".join(ch for ch in phone[1:] if ch.isdigit())
+        else:
+            phone = "".join(ch for ch in phone if ch.isdigit())
+        if not phone:
+            raise ValidationError("Телефонният номер е задължителен.")
+        user = getattr(self, "instance", None)
+        if user and User.objects.exclude(pk=user.pk).filter(phone=phone).exists():
+            raise ValidationError("Този телефонен номер вече се използва.")
+        return phone
+
+    def clean_first_name(self):
+        v = (self.cleaned_data.get("first_name") or "").strip()
+        if not v:
+            raise ValidationError("Полето е задължително.")
+        return v
+
+    def clean_last_name(self):
+        v = (self.cleaned_data.get("last_name") or "").strip()
+        if not v:
+            raise ValidationError("Полето е задължително.")
+        return v
+
+    def clean_country(self):
+        v = (self.cleaned_data.get("country") or "").strip()
+        if not v:
+            raise ValidationError("Полето е задължително.")
+        return v
+
+    def clean_city_or_village(self):
+        v = (self.cleaned_data.get("city_or_village") or "").strip()
+        if not v:
+            raise ValidationError("Полето е задължително.")
+        return v

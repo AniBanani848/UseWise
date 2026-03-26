@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block title %}UseWISE - Библиотека за вещи{% endblock %}
+
+{% block content %}
+  <section class="hero">
+    <h1>UseWISE (Библиотека за вещи)</h1>
+    <p>
+      Защо всеки да купува бормашина, палатка или уред за почистване на прозорци,
+      когато ги използва 1-2 пъти в годината?
+    </p>
+    <div class="button-row">
+      <a class="btn btn-primary" href="{% url 'accounts:signup' %}">Регистрация</a>
+      <a class="btn btn-secondary" href="/items/">Разгледай вещи</a>
+      <a class="btn btn-secondary" href="{% url 'accounts:login' %}">Вход</a>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Какво има в момента</h2>
+    <ul>
+      <li>Регистрация с две имена, държава, град/село, имейл и телефон.</li>
+      <li>Уникален телефонен номер за всеки профил.</li>
+      <li>Потвърждение на имейл преди активиране на акаунта.</li>
+    </ul>
+  </section>
+{% endblock %}
