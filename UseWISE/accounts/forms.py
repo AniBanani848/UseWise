@@ -66,8 +66,6 @@ class SignupForm(forms.ModelForm):
 
 
 class EmailLoginForm(AuthenticationForm):
-    """Вход с имейл (USERNAME_FIELD на User е email)."""
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["username"].label = "Имейл"

@@ -1,10 +1,7 @@
-import json
-
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
-from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils.encoding import force_str
@@ -41,14 +38,8 @@ def signup_html(request):
         form = SignupForm(request.POST)
         if form.is_valid():
             user = form.save()
-            user.is_active = True
-            user.save()
-            login(request, user)
-            messages.success(
-                request,
-                "Регистрацията е успешна. Добре дошли!",
-            )
-            return redirect(settings.LOGIN_REDIRECT_URL)
+            _send_verification_email(request, user)
+            return redirect("accounts:signup_done")
     else:
         form = SignupForm()
     return render(request, "accounts/signup.html", {"form": form})
@@ -114,122 +105,3 @@ def profile_html(request):
     else:
         form = ProfileEditForm(instance=request.user)
     return render(request, "accounts/profile.html", {"form": form})
-
-
-# --- JSON API ---
-
-
-@require_http_methods(["POST"])
-def signup_api(request):
-    form = SignupForm(request.POST)
-    if not form.is_valid():
-        return JsonResponse(
-            {"ok": False, "message": "Невалидни данни за регистрация.", "errors": form.errors},
-            status=400,
-        )
-
-    user = form.save()
-    user.is_active = True
-    user.save()
-    login(request, user)
-
-    return JsonResponse(
-        {
-            "ok": True,
-            "message": "Регистрацията е успешна. Добре дошли!",
-            "email": user.email,
-        },
-        status=201,
-    )
-
-
-@require_POST
-def login_api(request):
-    email = (request.POST.get("email") or "").strip().lower()
-    password = request.POST.get("password") or ""
-    user = authenticate(request, email=email, password=password)
-
-    if user is None:
-        return JsonResponse({"ok": False, "message": "Невалиден имейл или парола."}, status=400)
-
-    login(request, user)
-    return JsonResponse({"ok": True, "message": "Успешен вход."})
-
-
-@require_POST
-def logout_api(request):
-    logout(request)
-    return JsonResponse({"ok": True, "message": "Успешен изход."})
-
-
-@require_http_methods(["GET", "PATCH"])
-def me_api(request):
-    if not request.user.is_authenticated:
-        return JsonResponse({"ok": False, "message": "Не си логнат."}, status=401)
-
-    user = request.user
-
-    if request.method == "PATCH":
-        if request.content_type == "application/json":
-            try:
-                payload = json.loads(request.body or b"{}")
-            except json.JSONDecodeError:
-                return JsonResponse({"ok": False, "message": "Невалиден JSON."}, status=400)
-        else:
-            payload = request.POST
-
-        allowed_fields = {"first_name", "last_name", "country", "city_or_village", "phone"}
-        updates = {k: v for k, v in payload.items() if k in allowed_fields}
-
-        if not updates:
-            return JsonResponse(
-                {"ok": False, "message": "Няма подадени валидни полета за обновяване."},
-                status=400,
-            )
-
-        errors = {}
-        if "phone" in updates:
-            raw_phone = str(updates["phone"] or "")
-            phone = raw_phone.strip().replace(" ", "").replace("-", "")
-            if phone.startswith("+"):
-                phone = "+" + "".join(ch for ch in phone[1:] if ch.isdigit())
-            else:
-                phone = "".join(ch for ch in phone if ch.isdigit())
-
-            if not phone:
-                errors["phone"] = "Телефонният номер е задължителен."
-            elif User.objects.exclude(pk=user.pk).filter(phone=phone).exists():
-                errors["phone"] = "Този телефонен номер вече се използва."
-            else:
-                updates["phone"] = phone
-
-        for text_field in ("first_name", "last_name", "country", "city_or_village"):
-            if text_field in updates:
-                value = str(updates[text_field] or "").strip()
-                if not value:
-                    errors[text_field] = "Полето е задължително."
-                else:
-                    updates[text_field] = value
-
-        if errors:
-            return JsonResponse({"ok": False, "message": "Невалидни данни.", "errors": errors}, status=400)
-
-        for field, value in updates.items():
-            setattr(user, field, value)
-        user.save(update_fields=list(updates.keys()))
-
-    return JsonResponse(
-        {
-            "ok": True,
-            "user": {
-                "id": user.id,
-                "email": user.email,
-                "first_name": user.first_name,
-                "last_name": user.last_name,
-                "country": user.country,
-                "city_or_village": user.city_or_village,
-                "phone": user.phone,
-                "is_active": user.is_active,
-            },
-        }
-    )
