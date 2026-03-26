@@ -1,17 +1,17 @@
-<!doctype html>
-<html lang="bg">
-  <head>
-    <meta charset="utf-8" />
-    <title>Чакаме потвърждение</title>
-  </head>
-  <body>
-    <h1>Чакаме потвърждение</h1>
-    <p>
-      Регистрацията е създадена. Провери имейла си и потвърди адреса, за да активираш акаунта.
-    </p>
-    <p>
-      <a href="{% url 'accounts:login' %}">Отиди към вход</a>
-    </p>
-  </body>
-</html>
+{% extends "base.html" %}
 
+{% block title %}Провери имейла | UseWISE{% endblock %}
+
+{% block content %}
+  <section class="card">
+    <h1>Почти готово</h1>
+    <p>
+      Регистрацията е приета. Отвори имейла си и натисни линка за потвърждение,
+      за да активираш акаунта.
+    </p>
+    <p class="actions">
+      <a href="{% url 'accounts:login' %}">Към вход</a>
+      <a href="/">Начало</a>
+    </p>
+  </section>
+{% endblock %}

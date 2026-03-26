@@ -1,20 +1,23 @@
-<!doctype html>
-<html lang="bg">
-  <head>
-    <meta charset="utf-8" />
-    <title>Регистрация</title>
-  </head>
-  <body>
-    <h1>Регистрация</h1>
-    <form method="post">
-      {% csrf_token %}
-      {{ form.as_p }}
-      <button type="submit">Регистрирай</button>
-    </form>
-    <p>
-      Имаш акаунт?
-      <a href="{% url 'accounts:login' %}">Влез</a>
-    </p>
-  </body>
-</html>
+{% extends "base.html" %}
 
+{% block title %}Регистрация | UseWISE{% endblock %}
+
+{% block content %}
+  <section class="card form-errors">
+    <h1>Регистрация</h1>
+    <p style="color: var(--muted); margin-top: 0;">
+      Попълни данните си. След регистрация ще получиш имейл с линк за потвърждение.
+    </p>
+    <form method="post" action="">
+      {% csrf_token %}
+      {% if form.non_field_errors %}
+      {{ form.non_field_errors }}
+      {% endif %}
+      {{ form.as_p }}
+      <div class="button-row">
+        <button type="submit" class="btn btn-primary">Регистрирай се</button>
+        <a class="btn btn-secondary" href="{% url 'accounts:login' %}">Вече имаш акаунт?</a>
+      </div>
+    </form>
+  </section>
+{% endblock %}

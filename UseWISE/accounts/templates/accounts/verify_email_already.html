@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}Вече потвърден | UseWISE{% endblock %}
+
+{% block content %}
+  <section class="card">
+    <h1>Имейлът вече е потвърден</h1>
+    <p>Този акаунт е активен. Можеш да влезеш с имейл и парола.</p>
+    <p class="actions">
+      <a href="{% url 'accounts:login' %}">Вход</a>
+      <a href="/">Начало</a>
+    </p>
+  </section>
+{% endblock %}

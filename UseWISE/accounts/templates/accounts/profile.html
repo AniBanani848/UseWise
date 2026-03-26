@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block title %}Профил | UseWISE{% endblock %}
+
+{% block content %}
+  <section class="card form-errors">
+    <h1>Моят профил</h1>
+    <p style="color: var(--muted); margin-top: 0;">
+      <strong>Имейл:</strong> {{ user.email }} (не може да се смени оттук)
+    </p>
+    <form method="post" action="">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <div class="button-row">
+        <button type="submit" class="btn btn-primary">Запази</button>
+        <a class="btn btn-secondary" href="/">Начало</a>
+      </div>
+    </form>
+  </section>
+{% endblock %}

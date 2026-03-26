@@ -1,0 +1,23 @@
+{%extends "base.html"%}
+{% block content %}
+    <h2>Налични предмети за наемане</h2>
+    
+    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+        {% for item in items %}
+            <div style="border: 1px solid #ccc; padding: 15px; border-radius: 8px; width: 200px;">
+                <h3>{{ item.title }}</h3>
+                <p><strong>Цена на ден:</strong> {{ item.price_per_day }} лв.</p>
+                
+                {% if item.available %}
+                    <p style="color: green;">Свободен</p>
+                {% else %}
+                    <p style="color: red;">Зает</p>
+                {% endif %}
+                
+                <a href="{% url 'item_detail' item.id %}">Виж повече</a>
+            </div>
+        {% empty %}
+            <p>Все още няма добавени предмети.</p>
+        {% endfor %}
+    </div>
+{% endblock %}

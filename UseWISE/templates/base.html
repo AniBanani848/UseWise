@@ -1,0 +1,227 @@
+<!doctype html>
+<html lang="bg">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% block title %}UseWISE{% endblock %}</title>
+    {% block extra_head %}{% endblock %}
+    <style>
+      :root {
+        --bg: #f5f7fb;
+        --text: #1f2937;
+        --muted: #6b7280;
+        --primary: #2563eb;
+        --primary-dark: #1d4ed8;
+        --card: #ffffff;
+        --border: #e5e7eb;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.6;
+      }
+      .container {
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 0 16px;
+      }
+      .navbar {
+        background: var(--card);
+        border-bottom: 1px solid var(--border);
+      }
+      .navbar-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 0;
+      }
+      .brand {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--text);
+        text-decoration: none;
+      }
+      .nav-links a {
+        color: var(--muted);
+        text-decoration: none;
+        margin-left: 16px;
+        font-weight: 600;
+      }
+      .nav-links a:hover {
+        color: var(--primary-dark);
+      }
+      .page-main {
+        padding-top: 24px;
+        padding-bottom: 40px;
+      }
+      .hero {
+        margin: 0 0 20px;
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+      }
+      .hero h1 {
+        margin-top: 0;
+        margin-bottom: 10px;
+      }
+      .hero p {
+        color: var(--muted);
+        margin-bottom: 0;
+      }
+      .button-row {
+        margin-top: 18px;
+      }
+      .btn {
+        display: inline-block;
+        text-decoration: none;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-weight: 600;
+        margin-right: 10px;
+        margin-bottom: 8px;
+        border: 1px solid transparent;
+        cursor: pointer;
+        font: inherit;
+      }
+      button.btn-primary {
+        border: none;
+      }
+      .btn-primary {
+        background: var(--primary);
+        color: #fff;
+      }
+      .btn-primary:hover {
+        background: var(--primary-dark);
+      }
+      .btn-secondary {
+        background: #fff;
+        color: var(--text);
+        border-color: var(--border);
+      }
+      .btn-secondary:hover {
+        border-color: #c7cdd6;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 24px;
+        margin-bottom: 24px;
+      }
+      .card h1:first-child,
+      .card h2:first-child {
+        margin-top: 0;
+      }
+      .card a {
+        color: var(--primary);
+        text-decoration: none;
+      }
+      .card a:hover {
+        text-decoration: underline;
+      }
+      .actions a {
+        margin-right: 12px;
+      }
+      ul {
+        margin-bottom: 0;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 12px;
+        margin-top: 16px;
+      }
+      .item {
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 12px;
+        background: #fafafa;
+      }
+      .messages {
+        list-style: none;
+        padding: 0;
+        margin: 0 0 16px;
+      }
+      .messages li {
+        padding: 10px 14px;
+        border-radius: 8px;
+        margin-bottom: 8px;
+      }
+      .messages .success {
+        background: #d1fae5;
+        color: #065f46;
+      }
+      .messages .error {
+        background: #fee2e2;
+        color: #991b1b;
+      }
+      .messages .warning {
+        background: #fef3c7;
+        color: #92400e;
+      }
+      .form-errors .errorlist {
+        color: #991b1b;
+        padding-left: 18px;
+      }
+      .nav-links form {
+        display: inline;
+        margin: 0;
+      }
+      .nav-links button.nav-link-btn {
+        background: none;
+        border: none;
+        color: var(--muted);
+        font-weight: 600;
+        cursor: pointer;
+        font-size: inherit;
+        font-family: inherit;
+        margin-left: 16px;
+        padding: 0;
+      }
+      .nav-links button.nav-link-btn:hover {
+        color: var(--primary-dark);
+      }
+    </style>
+    {% block extra_css %}{% endblock %}
+  </head>
+  <body>
+    <header class="navbar">
+      <div class="container navbar-inner">
+        <a class="brand" href="/">UseWISE</a>
+        <nav class="nav-links">
+          <a href="/">Начало</a>
+          <a href="/items/">Вещи</a>
+          {% if user.is_authenticated %}
+          <a href="{% url 'accounts:profile' %}">Профил</a>
+          <form method="post" action="{% url 'accounts:logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="nav-link-btn">Изход</button>
+          </form>
+          {% else %}
+          <a href="{% url 'accounts:signup' %}">Регистрация</a>
+          <a href="{% url 'accounts:login' %}">Вход</a>
+          {% endif %}
+          <a href="{% url 'item_list' %}">Всички предмети</a>
+          <a href="{% url 'add_item' %}">Добави предмет</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="container page-main">
+      {% if messages %}
+      <ul class="messages">
+        {% for message in messages %}
+        <li class="{{ message.tags }}">{{ message }}</li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+      {% block content %}{% endblock %}
+    </main>
+  </body>
+</html>
