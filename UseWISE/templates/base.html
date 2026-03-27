@@ -1,271 +1,398 @@
-<!doctype html>
+<!DOCTYPE html>
+{% load static %}
 <html lang="bg">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{% block title %}UseWISE{% endblock %}</title>
-    {% block extra_head %}{% endblock %}
-    <style>
-      :root {
-        --bg: #f5f7fb;
-        --text: #1f2937;
-        --muted: #6b7280;
-        --primary: #2563eb;
-        --primary-dark: #1d4ed8;
-        --card: #ffffff;
-        --border: #e5e7eb;
-      }
-      * {
-        box-sizing: border-box;
-      }
-      body {
-        margin: 0;
-        font-family: Arial, sans-serif;
-        background: var(--bg);
-        color: var(--text);
-        line-height: 1.6;
-      }
-      .container {
-        max-width: 980px;
-        margin: 0 auto;
-        padding: 0 16px;
-      }
-      .navbar {
-        background: var(--card);
-        border-bottom: 1px solid var(--border);
-      }
-      .navbar-inner {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 14px 0;
-      }
-      .brand {
-        font-size: 20px;
-        font-weight: 700;
-        color: var(--text);
-        text-decoration: none;
-      }
-      .nav-links a {
-        color: var(--muted);
-        text-decoration: none;
-        margin-left: 16px;
-        font-weight: 600;
-      }
-      .nav-links a:hover {
-        color: var(--primary-dark);
-      }
-      .search-form {
-        display: inline-flex;
-        align-items: center;
-        background: #f9fafb;
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        padding: 4px 6px;
-        margin-left: 12px;
-      }
-      .search-form input {
-        border: none;
-        background: transparent;
-        min-width: 180px;
-        padding: 4px 6px;
-        outline: none;
-      }
-      .search-form button {
-        border: none;
-        background: var(--primary);
-        color: #fff;
-        border-radius: 6px;
-        padding: 5px 10px;
-        cursor: pointer;
-        font-weight: 600;
-      }
-      .search-form button:hover {
-        background: var(--primary-dark);
-      }
-      .page-main {
-        padding-top: 24px;
-        padding-bottom: 40px;
-      }
-      .hero {
-        margin: 0 0 20px;
-        background: var(--card);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 24px;
-      }
-      .hero h1 {
-        margin-top: 0;
-        margin-bottom: 10px;
-      }
-      .hero p {
-        color: var(--muted);
-        margin-bottom: 0;
-      }
-      .button-row {
-        margin-top: 18px;
-      }
-      .btn {
-        display: inline-block;
-        text-decoration: none;
-        padding: 10px 14px;
-        border-radius: 8px;
-        font-weight: 600;
-        margin-right: 10px;
-        margin-bottom: 8px;
-        border: 1px solid transparent;
-        cursor: pointer;
-        font: inherit;
-      }
-      button.btn-primary {
-        border: none;
-      }
-      .btn-primary {
-        background: var(--primary);
-        color: #fff;
-      }
-      .btn-primary:hover {
-        background: var(--primary-dark);
-      }
-      .btn-secondary {
-        background: #fff;
-        color: var(--text);
-        border-color: var(--border);
-      }
-      .btn-secondary:hover {
-        border-color: #c7cdd6;
-      }
-      .card {
-        background: var(--card);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        padding: 24px;
-        margin-bottom: 24px;
-      }
-      .card h1:first-child,
-      .card h2:first-child {
-        margin-top: 0;
-      }
-      .card a {
-        color: var(--primary);
-        text-decoration: none;
-      }
-      .card a:hover {
-        text-decoration: underline;
-      }
-      .actions a {
-        margin-right: 12px;
-      }
-      ul {
-        margin-bottom: 0;
-      }
-      .grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 12px;
-        margin-top: 16px;
-      }
-      .item {
-        border: 1px solid var(--border);
-        border-radius: 10px;
-        padding: 12px;
-        background: #fafafa;
-      }
-      .messages {
-        list-style: none;
-        padding: 0;
-        margin: 0 0 16px;
-      }
-      .messages li {
-        padding: 10px 14px;
-        border-radius: 8px;
-        margin-bottom: 8px;
-      }
-      .messages .success {
-        background: #d1fae5;
-        color: #065f46;
-      }
-      .messages .error {
-        background: #fee2e2;
-        color: #991b1b;
-      }
-      .messages .warning {
-        background: #fef3c7;
-        color: #92400e;
-      }
-      .messages .info {
-        background: #dbeafe;
-        color: #1d4ed8;
-      }
-      .form-errors .errorlist {
-        color: #991b1b;
-        padding-left: 18px;
-      }
-      .nav-links form {
-        display: inline;
-        margin: 0;
-      }
-      .nav-links button.nav-link-btn {
-        background: none;
-        border: none;
-        color: var(--muted);
-        font-weight: 600;
-        cursor: pointer;
-        font-size: inherit;
-        font-family: inherit;
-        margin-left: 16px;
-        padding: 0;
-      }
-      .nav-links button.nav-link-btn:hover {
-        color: var(--primary-dark);
-      }
-    </style>
-    {% block extra_css %}{% endblock %}
-  </head>
-  <body>
-    <header class="navbar">
-      <div class="container navbar-inner">
-        <a class="brand" href="/">UseWISE</a>
-        <nav class="nav-links">
-          <a href="/">Начало</a>
-          <a href="/items/">Вещи</a>
-          <form method="get" action="{% url 'item_list' %}" class="search-form">
-            <input
-              type="search"
-              name="q"
-              value="{{ request.GET.q|default:'' }}"
-              placeholder="Търси предмети..."
-              aria-label="Търси предмети"
-            />
-            <button type="submit">Търси</button>
-          </form>
-          {% if user.is_authenticated %}
-          <a href="{% url 'accounts:profile' %}">Профил</a>
-          <a href="{% url 'chat:list' %}">Чат</a>
-          <a href="{% url 'rentals:dashboard' %}">Моите наеми</a>
-          <form method="post" action="{% url 'accounts:logout' %}">
-            {% csrf_token %}
-            <button type="submit" class="nav-link-btn">Изход</button>
-          </form>
-          {% else %}
-          <a href="{% url 'accounts:signup' %}">Регистрация</a>
-          <a href="{% url 'accounts:login' %}">Вход</a>
-          {% endif %}
-          <a href="{% url 'item_list' %}">Всички предмети</a>
-          <a href="{% url 'add_item' %}">Добави предмет</a>
-        </nav>
-      </div>
-    </header>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}UseWISE{% endblock %}</title>
+  {% block extra_head %}{% endblock %}
 
-    <main class="container page-main">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --text-main: #1f2937;
+      --text-muted: #6b7280;
+      --text: var(--text-main);
+      --muted: var(--text-muted);
+      --border: #d6dfef;
+      --surface: rgba(255, 255, 255, 0.9);
+      --surface-soft: rgba(248, 251, 255, 0.94);
+      --shadow: 0 20px 50px rgba(15, 23, 42, 0.10);
+      --shadow-soft: 0 12px 30px rgba(37, 99, 235, 0.14);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Inter", "Segoe UI", sans-serif;
+      color: var(--text-main);
+      min-height: 100vh;
+      line-height: 1.6;
+      background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.14), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(96, 165, 250, 0.12), transparent 30%),
+        linear-gradient(180deg, #f8fbff 0%, #eef4ff 100%);
+    }
+
+    .page-shell {
+      max-width: 1120px;
+      margin: 24px auto;
+      padding: 0 14px;
+    }
+
+    .navbar {
+      border-radius: 22px;
+      padding: 0.9rem 1.1rem;
+      margin-bottom: 1.4rem;
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.96), rgba(29, 78, 216, 0.92));
+      box-shadow: 0 14px 34px rgba(37, 99, 235, 0.22);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+    }
+
+    .navbar-brand {
+      color: #fff !important;
+      font-weight: 800;
+      font-size: 1.2rem;
+      letter-spacing: 0.3px;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+    }
+
+    .brand-badge {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255, 255, 255, 0.15);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+      font-size: 1rem;
+      font-weight: 800;
+    }
+
+    .navbar .nav-link {
+      color: rgba(255, 255, 255, 0.92) !important;
+      font-weight: 600;
+      padding: 0.55rem 0.85rem;
+      border-radius: 12px;
+      transition: 0.22s ease;
+    }
+
+    .navbar .nav-link:hover {
+      color: #fff !important;
+      background: rgba(255, 255, 255, 0.10);
+      transform: translateY(-1px);
+    }
+
+    .navbar .nav-link.active-link {
+      color: #fff !important;
+      background: rgba(255, 255, 255, 0.16);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
+    }
+
+    .navbar-nav {
+      flex-wrap: nowrap !important;
+      gap: 0.5rem;
+    }
+
+    .navbar-nav form {
+      display: inline-flex;
+      align-items: center;
+      margin-left: 0.6rem;
+    }
+
+    .navbar-nav form .form-control {
+      min-width: 170px;
+      max-width: 220px;
+      margin-right: 0.25rem;
+    }
+
+    .navbar-nav form .btn {
+      margin: 0;
+      min-height: 34px;
+      padding: 0.35rem 0.8rem;
+    }
+
+    .nav-user-pill {
+      background: rgba(255, 255, 255, 0.14);
+      color: rgba(255, 255, 255, 0.95);
+      padding: 0.45rem 0.85rem;
+      border-radius: 999px;
+      font-size: 0.86rem;
+      font-weight: 600;
+    }
+
+    .main-card {
+      background: var(--surface);
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      border-radius: 28px;
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .main-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto auto 0;
+      width: 100%;
+      height: 5px;
+      background: linear-gradient(90deg, #2563eb, #60a5fa, #0ea5e9);
+    }
+
+    .hero,
+    .card {
+      background: var(--surface-soft);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1.5rem;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+      margin-bottom: 1.25rem;
+    }
+
+    .hero h1,
+    .card h1:first-child,
+    .card h2:first-child {
+      margin-top: 0;
+    }
+
+    .button-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 1rem;
+    }
+
+    .btn {
+      transition: 0.22s ease;
+      border-radius: 14px;
+      font-weight: 700;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+      border: none;
+      box-shadow: var(--shadow-soft);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, var(--primary-dark), #1e40af);
+      transform: translateY(-2px);
+      box-shadow: 0 16px 32px rgba(37, 99, 235, 0.22);
+    }
+
+    .btn-secondary,
+    .btn-light,
+    .btn-outline-light {
+      border-radius: 12px;
+      font-weight: 700;
+    }
+
+    .btn-secondary {
+      background: #fff;
+      color: var(--text-main);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover,
+    .btn-light:hover,
+    .btn-outline-light:hover {
+      transform: translateY(-1px);
+    }
+
+    .form-control,
+    .form-select,
+    textarea,
+    select,
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    input[type="number"],
+    input[type="date"],
+    input[type="search"] {
+      border-radius: 16px;
+      padding: 0.85rem 1rem;
+      border: 1px solid #dbe3ef;
+      background-color: #f8fbff;
+      transition: 0.2s ease;
+    }
+
+    .form-control:hover,
+    .form-select:hover,
+    textarea:hover,
+    select:hover,
+    input:hover {
+      border-color: #bfd4fb;
+      background: #ffffff;
+    }
+
+    .form-control:focus,
+    .form-select:focus,
+    textarea:focus,
+    select:focus,
+    input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 0.22rem rgba(37, 99, 235, 0.14);
+      background-color: #fff;
+      outline: none;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .item {
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 12px;
+      background: #fafcff;
+    }
+
+    .messages,
+    .errorlist {
+      list-style: none;
+      padding-left: 0;
+    }
+
+    .alert {
+      border-radius: 16px;
+      border: none;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+    }
+
+    .form-errors .errorlist {
+      color: #991b1b;
+      margin-bottom: 1rem;
+    }
+
+    .footer-note {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      margin-top: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .main-card {
+        padding: 1.25rem;
+        border-radius: 22px;
+      }
+
+      .page-shell {
+        margin: 14px auto;
+      }
+
+      .navbar {
+        border-radius: 18px;
+      }
+
+      .navbar-nav {
+        flex-wrap: wrap !important;
+        margin-top: 0.8rem;
+      }
+
+      .navbar-nav form {
+        margin-left: 0;
+        width: 100%;
+      }
+
+      .navbar-nav form .form-control {
+        max-width: none;
+        width: 100%;
+      }
+    }
+  </style>
+
+  {% block extra_css %}{% endblock %}
+</head>
+<body>
+  <div class="page-shell">
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container-fluid px-1">
+        <a class="navbar-brand" href="/">
+          <span class="brand-badge">U</span>
+          UseWISE
+        </a>
+
+        <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Навигация">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="mainNav">
+          <div class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+            <a class="nav-link {% if request.path == '/items/' %}active-link{% endif %}" href="{% url 'item_list' %}">Предмети</a>
+
+            <form method="get" action="{% url 'item_list' %}" class="d-flex align-items-center ms-2">
+              <input
+                type="search"
+                name="q"
+                value="{{ request.GET.q|default:'' }}"
+                placeholder="Търси предмети..."
+                class="form-control form-control-sm me-2"
+                style="min-width: 180px; max-width: 220px; border-radius: 12px;"
+              />
+              <button type="submit" class="btn btn-light btn-sm">Търси</button>
+            </form>
+
+            {% if user.is_authenticated %}
+              <a class="nav-link {% if request.path == '/items/add/' %}active-link{% endif %}" href="{% url 'add_item' %}">Добави</a>
+              <a class="nav-link {% if request.path == '/rentals/' %}active-link{% endif %}" href="{% url 'rentals:dashboard' %}">Наеми</a>
+              <a class="nav-link {% if request.path == '/chat/' or '/chat/room/' in request.path %}active-link{% endif %}" href="{% url 'chat:list' %}">Чат</a>
+              <a class="nav-link {% if request.path == '/accounts/profile/' %}active-link{% endif %}" href="{% url 'accounts:profile' %}">Профил</a>
+
+              <span class="nav-user-pill d-none d-lg-inline">
+                {{ user.first_name|default:user.username }}
+              </span>
+
+              <form action="{% url 'accounts:logout' %}" method="post" class="d-flex align-items-center ms-lg-2">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-light btn-sm">
+                  Изход
+                </button>
+              </form>
+            {% else %}
+              <a class="nav-link {% if request.path == '/accounts/login/' %}active-link{% endif %}" href="{% url 'accounts:login' %}">Вход</a>
+              <a class="btn btn-light btn-sm text-primary" href="{% url 'accounts:signup' %}">
+                Регистрация
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <div class="main-card">
       {% if messages %}
-      <ul class="messages">
         {% for message in messages %}
-        <li class="{{ message.tags }}">{{ message }}</li>
+          <div class="alert alert-{% if 'error' in message.tags %}danger{% elif 'success' in message.tags %}success{% elif 'warning' in message.tags %}warning{% else %}info{% endif %} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Затвори"></button>
+          </div>
         {% endfor %}
-      </ul>
       {% endif %}
+
       {% block content %}{% endblock %}
-    </main>
-  </body>
+    </div>
+
+    <div class="footer-note">
+      UseWISE • organize smarter
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
 </html>

@@ -5,6 +5,9 @@
 {% block content %}
   <section class="card">
     <h1>Моите наеми</h1>
+    <p style="color: var(--muted); margin-top: 0;">
+      Тук следиш заявките, които си изпратил, както и техния текущ статус.
+    </p>
     {% if renter_rentals %}
       <div class="grid">
         {% for rental in renter_rentals %}
@@ -35,6 +38,9 @@
 
   <section class="card">
     <h2>Заявки към моите вещи</h2>
+    <p style="color: var(--muted); margin-top: 0;">
+      Оттук можеш да приемаш или отказваш входящи заявки към публикуваните от теб вещи.
+    </p>
     {% if owner_requests %}
       <div class="grid">
         {% for rental in owner_requests %}

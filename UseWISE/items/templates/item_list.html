@@ -1,25 +1,188 @@
-{%extends "base.html"%}
+{% extends "base.html" %}
+
+{% block title %}Каталог с вещи | UseWISE{% endblock %}
+
+{% block extra_css %}
+  <style>
+    .catalog-header {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .catalog-header h1 {
+      margin-bottom: 0.35rem;
+    }
+
+    .catalog-header p {
+      margin: 0;
+      color: var(--text-muted);
+    }
+
+    .catalog-summary {
+      margin-bottom: 1.15rem;
+      color: var(--text-muted);
+    }
+
+    .catalog-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1rem;
+    }
+
+    .catalog-item {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      background: linear-gradient(180deg, #ffffff, #f8fbff);
+      overflow: hidden;
+      box-shadow: 0 14px 28px rgba(15, 23, 42, 0.06);
+    }
+
+    .catalog-item-media {
+      aspect-ratio: 4 / 3;
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(14, 165, 233, 0.18));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary-dark);
+      font-weight: 800;
+      letter-spacing: 0.08em;
+    }
+
+    .catalog-item-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .catalog-item-body {
+      padding: 0 1.1rem 1.1rem;
+    }
+
+    .catalog-item-body h2 {
+      font-size: 1.18rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .catalog-description {
+      color: var(--text-main);
+      margin-bottom: 0.95rem;
+    }
+
+    .catalog-meta {
+      display: grid;
+      gap: 0.45rem;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.35rem 0.7rem;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+
+    .status-pill.available {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .status-pill.unavailable {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .catalog-actions {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+    }
+
+    .catalog-actions a {
+      text-decoration: none;
+      font-weight: 700;
+    }
+
+    .catalog-empty {
+      text-align: center;
+      padding: 2rem 1rem;
+      color: var(--text-muted);
+    }
+  </style>
+{% endblock %}
+
 {% block content %}
-    <h2>Налични предмети за наемане</h2>
-    {% if query %}
-        <p>Резултати за търсене: "{{ query }}" ({{ items.count }} предмет(а)).</p>
-    {% endif %}
-    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-        {% for item in items %}
-            <div style="border: 1px solid #ccc; padding: 15px; border-radius: 8px; width: 200px;">
-                <h3>{{ item.title }}</h3>
-                <p><strong>Цена на ден:</strong> {{ item.price_per_day }} лв.</p>
-                
-                {% if item.available %}
-                    <p style="color: green;">Свободен</p>
-                {% else %}
-                    <p style="color: red;">Зает</p>
-                {% endif %}
-                
-                <a href="{% url 'item_detail' item.id %}">Виж повече</a>
-            </div>
-        {% empty %}
-            <p>Все още няма добавени предмети.</p>
-        {% endfor %}
+  <section class="card">
+    <div class="catalog-header">
+      <div>
+        <h1>Налични вещи за наемане</h1>
+        <p>Разгледай каталога и открий нещо полезно без да го купуваш.</p>
+      </div>
+      {% if user.is_authenticated %}
+        <a href="{% url 'add_item' %}" class="btn btn-primary">Добави вещ</a>
+      {% endif %}
     </div>
+
+    {% if query %}
+      <p class="catalog-summary">Резултати за „{{ query }}“: {{ items|length }} намерени обяви.</p>
+    {% else %}
+      <p class="catalog-summary">Общо активни обяви в каталога: {{ items|length }}.</p>
+    {% endif %}
+
+    <div class="catalog-grid">
+      {% for item in items %}
+        <article class="catalog-item">
+          <div class="catalog-item-media">
+            {% if item.image %}
+              <img src="{{ item.image.url }}" alt="{{ item.title }}">
+            {% else %}
+              USEWISE
+            {% endif %}
+          </div>
+
+          <div class="catalog-item-body">
+            <h2>{{ item.title }}</h2>
+            <p class="catalog-description">{{ item.description|truncatewords:18 }}</p>
+
+            <div class="catalog-meta">
+              <div><strong>Цена:</strong> {{ item.price_per_day }} лв. на ден</div>
+              <div><strong>Собственик:</strong> {{ item.owner.first_name }} {{ item.owner.last_name }}</div>
+              <div>
+                <strong>Рейтинг:</strong>
+                {% if item.review_count %}
+                  {{ item.average_rating|floatformat:1 }}/5 от {{ item.review_count }} отзива
+                {% else %}
+                  Все още няма отзиви
+                {% endif %}
+              </div>
+            </div>
+
+            <div class="catalog-actions">
+              <span class="status-pill {% if item.available %}available{% else %}unavailable{% endif %}">
+                {% if item.available %}Свободна за заявка{% else %}Временно недостъпна{% endif %}
+              </span>
+              <a href="{% url 'item_detail' item.id %}">Виж детайли</a>
+            </div>
+          </div>
+        </article>
+      {% empty %}
+        <div class="card catalog-empty">
+          Все още няма добавени вещи. {% if user.is_authenticated %}Ти можеш да публикуваш първата.{% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </section>
 {% endblock %}

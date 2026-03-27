@@ -1,62 +1,293 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+
+{% block title %}{{ item.title }} | UseWISE{% endblock %}
+
+{% block extra_css %}
+  <style>
+    .detail-hero {
+      display: grid;
+      grid-template-columns: minmax(280px, 0.95fr) minmax(0, 1.05fr);
+      gap: 1.4rem;
+      align-items: start;
+    }
+
+    .detail-media {
+      border-radius: 24px;
+      overflow: hidden;
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.12), rgba(14, 165, 233, 0.18));
+      border: 1px solid var(--border);
+      aspect-ratio: 4 / 3;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary-dark);
+      font-weight: 800;
+      letter-spacing: 0.08em;
+    }
+
+    .detail-media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .detail-meta {
+      display: grid;
+      gap: 0.75rem;
+    }
+
+    .detail-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      color: var(--primary);
+      font-weight: 700;
+      text-decoration: none;
+      margin-bottom: 0.35rem;
+    }
+
+    .detail-title-row {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .detail-title-row h1 {
+      margin-bottom: 0.3rem;
+    }
+
+    .detail-description {
+      color: var(--text-main);
+      white-space: pre-wrap;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.75rem;
+    }
+
+    .meta-box {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 0.9rem 1rem;
+    }
+
+    .meta-box strong {
+      display: block;
+      margin-bottom: 0.35rem;
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.4rem 0.8rem;
+      border-radius: 999px;
+      font-size: 0.84rem;
+      font-weight: 800;
+    }
+
+    .status-pill.available {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .status-pill.unavailable {
+      background: #fee2e2;
+      color: #991b1b;
+    }
+
+    .detail-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+      gap: 1.25rem;
+    }
+
+    .schedule-list,
+    .review-list {
+      display: grid;
+      gap: 0.85rem;
+      margin-top: 1rem;
+    }
+
+    .schedule-item,
+    .review-item {
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 0.95rem 1rem;
+      background: #fff;
+    }
+
+    .review-item p:last-child {
+      margin-bottom: 0;
+    }
+
+    .helper-text {
+      color: var(--text-muted);
+      margin-top: 0;
+    }
+
+    .owner-actions {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 900px) {
+      .detail-hero,
+      .detail-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+{% endblock %}
 
 {% block content %}
   <section class="card">
-    <h1>{{ item.title }}</h1>
+    <div class="detail-hero">
+      <div class="detail-media">
+        {% if item.image %}
+          <img src="{{ item.image.url }}" alt="{{ item.title }}">
+        {% else %}
+          USEWISE
+        {% endif %}
+      </div>
 
-    {% if item.image %}
-      <img src="{{ item.image.url }}" alt="{{ item.title }}" style="max-width: 300px; width: 100%; border-radius: 8px; margin-bottom: 16px;">
-    {% endif %}
+      <div class="detail-meta">
+        <a class="detail-back" href="{% url 'item_list' %}">&larr; Обратно към каталога</a>
+        <div class="detail-title-row">
+          <div>
+            <h1>{{ item.title }}</h1>
+            <p class="helper-text">Свържи се директно със собственика и изпрати заявка за конкретни дати.</p>
+          </div>
+          <span class="status-pill {% if item.available %}available{% else %}unavailable{% endif %}">
+            {% if item.available %}Приема заявки{% else %}Временно недостъпна{% endif %}
+          </span>
+        </div>
 
-    <p><strong>Описание:</strong></p>
-    <p>{{ item.description }}</p>
+        <p class="detail-description">{{ item.description }}</p>
 
-    <p><strong>Цена на ден:</strong> {{ item.price_per_day }} лв.</p>
-    <p><strong>Собственик:</strong> {{ item.owner.first_name }} {{ item.owner.last_name }}</p>
-    <p><strong>Телефон:</strong> {{ item.owner.phone }}</p>
-    <p><strong>Населено място:</strong> {{ item.owner.city_or_village }}, {{ item.owner.country }}</p>
-    {% if user.is_authenticated and user != item.owner %}
-      <form method="post" action="{% url 'chat:start_direct' item.owner.id %}">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-secondary">Пиши на собственика</button>
-      </form>
-    {% endif %}
+        <div class="meta-grid">
+          <div class="meta-box">
+            <strong>Цена на ден</strong>
+            {{ item.price_per_day }} лв.
+          </div>
+          <div class="meta-box">
+            <strong>Рейтинг</strong>
+            {% if review_summary.review_count %}
+              {{ review_summary.average_rating|floatformat:1 }}/5 от {{ review_summary.review_count }} отзива
+            {% else %}
+              Все още няма отзиви
+            {% endif %}
+          </div>
+          <div class="meta-box">
+            <strong>Собственик</strong>
+            {{ item.owner.first_name }} {{ item.owner.last_name }}
+          </div>
+          <div class="meta-box">
+            <strong>Локация и контакт</strong>
+            {{ item.owner.city_or_village }}, {{ item.owner.country }}<br>
+            {{ item.owner.phone }}
+          </div>
+        </div>
 
-    {% if item.available %}
-      <p style="color: green;"><strong>Статус:</strong> Вещта е обявена за наемане.</p>
-    {% else %}
-      <p style="color: #991b1b;"><strong>Статус:</strong> Вещта не приема нови наеми в момента.</p>
-    {% endif %}
+        <div class="owner-actions">
+          {% if user.is_authenticated and user != item.owner %}
+            <form method="post" action="{% url 'chat:start_direct' item.owner.id %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-secondary">Пиши на собственика</button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+    </div>
   </section>
 
-  <section class="card">
-    <h2>Заети периоди</h2>
-    {% if approved_rentals %}
-      <p>Не можеш да заявиш наем за дати, които се припокриват със следните одобрени периоди:</p>
-      <ul>
-        {% for rental in approved_rentals %}
-          <li>{{ rental.start_date }} - {{ rental.end_date }}{% if rental.is_current %} (в момента е нает){% endif %}</li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <p>В момента няма одобрени наеми за тази вещ.</p>
-    {% endif %}
-  </section>
+  <section class="detail-grid">
+    <div>
+      <section class="card">
+        <h2>Заети периоди</h2>
+        <p class="helper-text">Системата не позволява припокриване с вече одобрени наеми.</p>
+        {% if approved_rentals %}
+          <div class="schedule-list">
+            {% for rental in approved_rentals %}
+              <article class="schedule-item">
+                <strong>{{ rental.start_date }} - {{ rental.end_date }}</strong>
+                <div>
+                  {% if rental.is_current %}
+                    В момента вещта е наета.
+                  {% else %}
+                    Периодът е резервиран.
+                  {% endif %}
+                </div>
+              </article>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p>В момента няма одобрени наеми за тази вещ.</p>
+        {% endif %}
+      </section>
 
-  <section class="card form-errors">
-    <h2>Заяви наем</h2>
-    {% if not user.is_authenticated %}
-      <p>За да заявиш наем, първо <a href="{% url 'accounts:login' %}">влез в профила си</a>.</p>
-    {% elif user == item.owner %}
-      <p>Това е твоя вещ, затова не можеш да подадеш заявка за нея.</p>
-    {% elif not item.available %}
-      <p>Собственикът временно е спрял новите заявки за тази вещ.</p>
-    {% else %}
-      <form method="post" action="{% url 'rentals:create' item.id %}">
-        {% csrf_token %}
-        {{ rental_form.as_p }}
-        <button type="submit" class="btn btn-primary">Изпрати заявка</button>
-      </form>
-    {% endif %}
+      <section class="card">
+        <h2>Отзиви</h2>
+        {% if reviews %}
+          <div class="review-list">
+            {% for review in reviews %}
+              <article class="review-item">
+                <p><strong>{{ review.author.first_name }} {{ review.author.last_name }}</strong> оцени с {{ review.rating }}/5</p>
+                <p>{{ review.comment }}</p>
+                <small>{{ review.created_at|date:"d.m.Y H:i" }}</small>
+              </article>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p>Все още няма публикувани отзиви за тази вещ.</p>
+        {% endif %}
+      </section>
+    </div>
+
+    <div>
+      <section class="card form-errors">
+        <h2>Заяви наем</h2>
+        {% if not user.is_authenticated %}
+          <p>За да заявиш наем, първо <a href="{% url 'accounts:login' %}">влез в профила си</a>.</p>
+        {% elif user == item.owner %}
+          <p>Това е твоя вещ, затова не можеш да подадеш заявка за нея.</p>
+        {% elif not item.available %}
+          <p>Собственикът временно е спрял новите заявки за тази вещ.</p>
+        {% else %}
+          <p class="helper-text">Избери свободен период и изпрати заявката директно към собственика.</p>
+          <form method="post" action="{% url 'rentals:create' item.id %}">
+            {% csrf_token %}
+            {{ rental_form.as_p }}
+            <button type="submit" class="btn btn-primary">Изпрати заявка</button>
+          </form>
+        {% endif %}
+      </section>
+
+      <section class="card form-errors">
+        <h2>Остави отзив</h2>
+        {% if not user.is_authenticated %}
+          <p>За да оставиш отзив, първо <a href="{% url 'accounts:login' %}">влез в профила си</a>.</p>
+        {% elif user == item.owner %}
+          <p>Не можеш да оценяваш собствената си вещ.</p>
+        {% elif can_review %}
+          <p class="helper-text">След приключил наем можеш да помогнеш на следващите хора с честен отзив.</p>
+          <form method="post" action="{% url 'add_review' item.id %}">
+            {% csrf_token %}
+            {{ review_form.as_p }}
+            <button type="submit" class="btn btn-primary">Публикувай отзив</button>
+          </form>
+        {% elif has_user_review %}
+          <p>Вече си оставил отзив за тази вещ.</p>
+        {% else %}
+          <p>Можеш да оставиш отзив само след приключил одобрен наем.</p>
+        {% endif %}
+      </section>
+    </div>
   </section>
 {% endblock %}

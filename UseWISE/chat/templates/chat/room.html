@@ -4,12 +4,15 @@
 
 {% block extra_css %}
 <style>
+  .chat-room-shell {
+    display: grid;
+    gap: 16px;
+  }
   .chat-room-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    margin-bottom: 16px;
   }
   .chat-room-title {
     margin: 0 0 4px;
@@ -17,6 +20,11 @@
   .chat-back {
     color: var(--primary);
     text-decoration: none;
+    font-weight: 700;
+  }
+  .chat-room-subtitle {
+    margin: 0;
+    color: var(--muted);
   }
   .chat-status {
     display: inline-flex;
@@ -70,6 +78,9 @@
   .chat-bubble.them {
     background: #e9efff;
     color: var(--text);
+  }
+  .chat-bubble.me .chat-meta {
+    color: rgba(255, 255, 255, 0.78);
   }
   .chat-author {
     font-size: 13px;
@@ -125,36 +136,39 @@
 {% endblock %}
 
 {% block content %}
-<div class="chat-room-header">
-  <div>
-    <h1 class="chat-room-title">{{ other_user.get_full_name|default:other_user.email }}</h1>
-    <a class="chat-back" href="{% url 'chat:list' %}">&larr; Обратно към чатовете</a>
+<div class="chat-room-shell">
+  <div class="chat-room-header">
+    <div>
+      <a class="chat-back" href="{% url 'chat:list' %}">&larr; Обратно към чатовете</a>
+      <h1 class="chat-room-title">{{ other_user.get_full_name|default:other_user.email }}</h1>
+      <p class="chat-room-subtitle">Пиши директно, за да уточните детайли по наема.</p>
+    </div>
+    <span class="chat-status" id="ws-status">Свързване...</span>
   </div>
-  <span class="chat-status" id="ws-status">Свързване...</span>
-</div>
 
-<section class="card">
-  <div class="chat-log" id="chat-log">
-    {% for m in chat_messages %}
-      <div class="chat-row {% if m.sender_id == user.id %}me{% else %}them{% endif %}">
-        <div class="chat-bubble {% if m.sender_id == user.id %}me{% else %}them{% endif %}">
-          <div class="chat-author">{{ m.sender.get_full_name|default:m.sender.email }}</div>
-          <div>{{ m.body|linebreaksbr }}</div>
-          <div class="chat-meta">{{ m.created_at|date:"d.m.Y H:i" }}</div>
+  <section class="card">
+    <div class="chat-log" id="chat-log">
+      {% for m in chat_messages %}
+        <div class="chat-row {% if m.sender_id == user.id %}me{% else %}them{% endif %}">
+          <div class="chat-bubble {% if m.sender_id == user.id %}me{% else %}them{% endif %}">
+            <div class="chat-author">{{ m.sender.get_full_name|default:m.sender.email }}</div>
+            <div>{{ m.body|linebreaksbr }}</div>
+            <div class="chat-meta">{{ m.created_at|date:"d.m.Y H:i" }}</div>
+          </div>
         </div>
-      </div>
-    {% empty %}
-      <p class="chat-empty" id="empty-hint">Още няма съобщения. Напиши първото.</p>
-    {% endfor %}
-  </div>
+      {% empty %}
+        <p class="chat-empty" id="empty-hint">Още няма съобщения. Напиши първото.</p>
+      {% endfor %}
+    </div>
 
-  <form id="chat-form" class="chat-compose" autocomplete="off">
-    {% csrf_token %}
-    <label for="chat-input" class="visually-hidden">Съобщение</label>
-    <input id="chat-input" type="text" maxlength="2000" placeholder="Напиши съобщение..." required />
-    <button type="submit" class="btn btn-primary">Изпрати</button>
-  </form>
-</section>
+    <form id="chat-form" class="chat-compose" autocomplete="off">
+      {% csrf_token %}
+      <label for="chat-input" class="visually-hidden">Съобщение</label>
+      <input id="chat-input" type="text" maxlength="2000" placeholder="Напиши съобщение..." required />
+      <button type="submit" class="btn btn-primary">Изпрати</button>
+    </form>
+  </section>
+</div>
 
 {{ friendship.id|json_script:"friendship-id" }}
 {{ user.id|json_script:"current-user-id" }}

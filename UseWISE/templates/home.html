@@ -1,18 +1,144 @@
 {% extends "base.html" %}
 
-{% block title %}UseWISE - Библиотека за вещи{% endblock %}
+{% block title %}UseWISE | Споделяй, вместо да трупаш{% endblock %}
+
+{% block extra_css %}
+  <style>
+    .landing-hero {
+      max-width: 760px;
+      padding: 0.5rem 0;
+    }
+
+    .landing-copy {
+      padding: 0;
+    }
+
+    .landing-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.45rem 0.9rem;
+      border-radius: 999px;
+      background: rgba(37, 99, 235, 0.1);
+      color: var(--primary-dark);
+      font-weight: 700;
+      margin-bottom: 1rem;
+    }
+
+    .landing-copy h1 {
+      font-size: clamp(2.3rem, 5vw, 4.3rem);
+      line-height: 1;
+      margin-bottom: 1rem;
+      letter-spacing: -0.04em;
+    }
+
+    .landing-copy p {
+      font-size: 1.06rem;
+      color: var(--text-muted);
+      max-width: 44rem;
+    }
+
+    .landing-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.8rem;
+      margin-top: 1.4rem;
+    }
+
+    .landing-actions .btn {
+      min-width: 150px;
+    }
+
+    .landing-note {
+      margin-top: 1rem;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .section-title {
+      margin-bottom: 0.35rem;
+    }
+
+    .section-subtitle {
+      color: var(--text-muted);
+      margin-top: 0;
+      margin-bottom: 1.2rem;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1rem;
+    }
+
+    .feature-card {
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: #fff;
+      padding: 1.25rem;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+    }
+
+    .feature-card h3 {
+      margin-top: 0;
+      margin-bottom: 0.65rem;
+    }
+
+    .feature-card p {
+      margin-bottom: 0;
+      color: var(--text-muted);
+    }
+  </style>
+{% endblock %}
 
 {% block content %}
   <section class="hero">
-    <h1>UseWISE (Библиотека за вещи)</h1>
-    <p>
-      Защо всеки да купува бормашина, палатка или уред за почистване на прозорци,
-      когато ги използва 1-2 пъти в годината?
-    </p>
-    <div class="button-row">
-      <a class="btn btn-primary" href="{% url 'accounts:signup' %}">Регистрация</a>
-      <a class="btn btn-secondary" href="/items/">Разгледай вещи</a>
-      <a class="btn btn-secondary" href="{% url 'accounts:login' %}">Вход</a>
+    <div class="landing-hero">
+      <div class="landing-copy">
+        <div class="landing-kicker">UseWISE • библиотека за вещи</div>
+        <h1>Наеми това, което ти трябва, точно когато ти трябва.</h1>
+        <p>
+          UseWISE помага на хората да споделят полезни вещи вместо да ги купуват,
+          складират и използват веднъж годишно. Каталог, заявки за наем, чат и
+          отзиви са събрани в един прост работещ flow.
+        </p>
+        <div class="landing-actions">
+          <a href="{% url 'item_list' %}" class="btn btn-primary">Разгледай вещите</a>
+          {% if user.is_authenticated %}
+            <a href="{% url 'add_item' %}" class="btn btn-secondary">Добави своя вещ</a>
+          {% else %}
+            <a href="{% url 'accounts:signup' %}" class="btn btn-secondary">Създай профил</a>
+          {% endif %}
+          <a href="{% url 'chat:list' %}" class="btn btn-secondary">Отвори чатовете</a>
+        </div>
+        <p class="landing-note">
+          Подходящо за инструменти, къмпинг оборудване, домакински уреди и всичко,
+          което не е нужно да притежаваш постоянно.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2 class="section-title">Какво можеш да направиш</h2>
+    <p class="section-subtitle">Основните потребителски действия са готови за демо.</p>
+    <div class="feature-grid">
+      <article class="feature-card">
+        <h3>Публикувай вещ</h3>
+        <p>Добави заглавие, описание, цена на ден и снимка, за да я направиш видима в каталога.</p>
+      </article>
+      <article class="feature-card">
+        <h3>Заяви период</h3>
+        <p>Провери заети дати и изпрати заявка за конкретен период без припокриване.</p>
+      </article>
+      <article class="feature-card">
+        <h3>Пиши директно</h3>
+        <p>Свържи се със собственика или наемателя през вградения чат в реално време.</p>
+      </article>
+      <article class="feature-card">
+        <h3>Изгради доверие</h3>
+        <p>Оставяй отзиви след приключил наем, за да стане каталогът по-надежден.</p>
+      </article>
     </div>
   </section>
 {% endblock %}
