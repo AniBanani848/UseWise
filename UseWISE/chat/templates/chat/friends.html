@@ -4,6 +4,21 @@
 
 {% block extra_css %}
 <style>
+  .chat-page-header {
+    display: flex;
+    align-items: end;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 18px;
+    flex-wrap: wrap;
+  }
+  .chat-page-header h1 {
+    margin: 0 0 6px;
+  }
+  .chat-page-header p {
+    margin: 0;
+    color: var(--muted);
+  }
   .chat-layout {
     display: grid;
     grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
@@ -12,10 +27,27 @@
   .chat-panel-title {
     margin-top: 0;
     margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
   }
   .chat-help {
     margin-top: 0;
     color: var(--muted);
+  }
+  .chat-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+    padding: 0 10px;
+    border-radius: 999px;
+    background: rgba(37, 99, 235, 0.10);
+    color: var(--primary-dark);
+    font-size: 13px;
+    font-weight: 800;
   }
   .chat-form-row {
     display: flex;
@@ -69,6 +101,14 @@
     color: var(--muted);
     margin: 0;
   }
+  .chat-panel-note {
+    margin: 0 0 14px;
+    color: var(--muted);
+  }
+  .chat-status-text {
+    color: var(--muted);
+    font-size: 14px;
+  }
   @media (max-width: 800px) {
     .chat-layout {
       grid-template-columns: 1fr;
@@ -85,6 +125,13 @@
 {% endblock %}
 
 {% block content %}
+<div class="chat-page-header">
+  <div>
+    <h1>Чатове</h1>
+    <p>Пиши директно с хората, с които искаш да наемеш или споделиш вещ.</p>
+  </div>
+</div>
+
 <div class="chat-layout">
   <section class="card">
     <h1 class="chat-panel-title">Нов чат</h1>
@@ -101,7 +148,11 @@
 
   <section>
     <div class="card chat-section">
-      <h2 class="chat-panel-title">Активни чатове</h2>
+      <h2 class="chat-panel-title">
+        Активни чатове
+        <span class="chat-badge">{{ accepted|length }}</span>
+      </h2>
+      <p class="chat-panel-note">Тук са разговорите, в които вече можеш да пишеш в реално време.</p>
       <ul class="chat-list">
         {% for f in accepted %}
           {% if f.from_user_id == user.id %}
@@ -134,14 +185,18 @@
             {% endwith %}
           {% endif %}
         {% empty %}
-          <li><p class="chat-empty">Още нямаш активни чатове.</p></li>
+          <li><p class="chat-empty">Още нямаш активни чатове. Изпрати заявка от формата вляво, за да започнеш първия.</p></li>
         {% endfor %}
       </ul>
     </div>
 
     {% if pending_in %}
       <div class="card chat-section">
-        <h2 class="chat-panel-title">Входящи заявки</h2>
+        <h2 class="chat-panel-title">
+          Входящи заявки
+          <span class="chat-badge">{{ pending_in|length }}</span>
+        </h2>
+        <p class="chat-panel-note">Тези хора чакат твоето решение, за да отворят чат с теб.</p>
         <ul class="chat-list">
           {% for f in pending_in %}
             <li>
@@ -169,7 +224,11 @@
 
     {% if pending_out %}
       <div class="card chat-section">
-        <h2 class="chat-panel-title">Чакащи отговор</h2>
+        <h2 class="chat-panel-title">
+          Чакащи отговор
+          <span class="chat-badge">{{ pending_out|length }}</span>
+        </h2>
+        <p class="chat-panel-note">Изпратил си заявка и чакаш отсрещният човек да я приеме.</p>
         <ul class="chat-list">
           {% for f in pending_out %}
             <li>
@@ -178,7 +237,7 @@
                   <div class="chat-name">{{ f.to_user.get_full_name|default:f.to_user.email }}</div>
                   <div class="chat-email">{{ f.to_user.email }}</div>
                 </div>
-                <div class="chat-email">Заявката е изпратена.</div>
+                <div class="chat-status-text">Заявката е изпратена.</div>
               </div>
             </li>
           {% endfor %}

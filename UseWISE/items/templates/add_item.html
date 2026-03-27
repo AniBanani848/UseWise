@@ -1,15 +1,21 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+
+{% block title %}Добави вещ | UseWISE{% endblock %}
 
 {% block content %}
-    <h2>Добави нов предмет</h2>
-    
+  <section class="card form-errors">
+    <h1>Добави нова вещ</h1>
+    <p style="color: var(--muted); margin-top: 0;">
+      Попълни кратко описание, цена на ден и снимка, за да публикуваш обявата си.
+    </p>
+
     <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        
-        {{ form.as_p }}
-        
-        <button type="submit" style="padding: 10px 20px; background-color: #008CBA; color: white; border: none; border-radius: 5px; cursor: pointer;">
-            Запази предмета
-        </button>
+      {% csrf_token %}
+      {{ form.as_p }}
+      <div class="button-row">
+        <button type="submit" class="btn btn-primary">Запази вещта</button>
+        <a href="{% url 'item_list' %}" class="btn btn-secondary">Назад към каталога</a>
+      </div>
     </form>
+  </section>
 {% endblock %}
