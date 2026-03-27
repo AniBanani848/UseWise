@@ -29,6 +29,15 @@ class SignupForm(forms.ModelForm):
             "phone",
         )
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Add CSS classes to all fields
+        for field in self.fields.values():
+            field.widget.attrs.update({
+                'class': 'form-input',
+                'placeholder': field.label
+            })
+
     def clean_email(self):
         email = self.cleaned_data.get("email") or ""
         return email.strip().lower()
@@ -56,7 +65,7 @@ class SignupForm(forms.ModelForm):
 
     def _create_user(self) -> User:
         user = super().save(commit=False)
-        user.is_active = False
+        user.is_active = True
         user.set_password(self.cleaned_data["password1"])
         user.save()
         return user
@@ -66,11 +75,17 @@ class SignupForm(forms.ModelForm):
 
 
 class EmailLoginForm(AuthenticationForm):
-    """Вход с имейл (USERNAME_FIELD на User е email)."""
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["username"].label = "Имейл"
+        self.fields["username"].widget.attrs.update({
+            'class': 'form-input',
+            'placeholder': 'Имейл'
+        })
+        self.fields["password"].widget.attrs.update({
+            'class': 'form-input',
+            'placeholder': 'Парола'
+        })
 
 
 class ProfileEditForm(forms.ModelForm):

@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}Чат | UseWISE{% endblock %}
+
+{% block extra_css %}
+<style>
+  .chat-layout {
+    display: grid;
+    grid-template-columns: minmax(260px, 320px) minmax(0, 1fr);
+    gap: 24px;
+  }
+  .chat-panel-title {
+    margin-top: 0;
+    margin-bottom: 8px;
+  }
+  .chat-help {
+    margin-top: 0;
+    color: var(--muted);
+  }
+  .chat-form-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+  .chat-form-row input {
+    flex: 1 1 220px;
+    min-width: 0;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font: inherit;
+  }
+  .chat-section + .chat-section {
+    margin-top: 20px;
+  }
+  .chat-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .chat-list li + li {
+    border-top: 1px solid var(--border);
+  }
+  .chat-list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 14px 0;
+  }
+  .chat-person {
+    min-width: 0;
+  }
+  .chat-name {
+    font-weight: 700;
+  }
+  .chat-email {
+    color: var(--muted);
+    font-size: 14px;
+    word-break: break-word;
+  }
+  .chat-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+  .chat-empty {
+    color: var(--muted);
+    margin: 0;
+  }
+  @media (max-width: 800px) {
+    .chat-layout {
+      grid-template-columns: 1fr;
+    }
+    .chat-list-item {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+    .chat-actions {
+      justify-content: flex-start;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="chat-layout">
+  <section class="card">
+    <h1 class="chat-panel-title">Нов чат</h1>
+    <p class="chat-help">Изпрати заявка по имейл. Когато отсрещният човек я приеме, ще можете да си пишете на живо.</p>
+    <form method="post" action="{% url 'chat:add_contact' %}">
+      {% csrf_token %}
+      <label for="email">Имейл</label>
+      <div class="chat-form-row">
+        <input id="email" type="email" name="email" placeholder="someone@example.com" required />
+        <button type="submit" class="btn btn-primary">Изпрати</button>
+      </div>
+    </form>
+  </section>
+
+  <section>
+    <div class="card chat-section">
+      <h2 class="chat-panel-title">Активни чатове</h2>
+      <ul class="chat-list">
+        {% for f in accepted %}
+          {% if f.from_user_id == user.id %}
+            {% with other=f.to_user %}
+              <li>
+                <div class="chat-list-item">
+                  <div class="chat-person">
+                    <div class="chat-name">{{ other.get_full_name|default:other.email }}</div>
+                    <div class="chat-email">{{ other.email }}</div>
+                  </div>
+                  <div class="chat-actions">
+                    <a class="btn btn-primary" href="{% url 'chat:room' f.id %}">Отвори</a>
+                  </div>
+                </div>
+              </li>
+            {% endwith %}
+          {% else %}
+            {% with other=f.from_user %}
+              <li>
+                <div class="chat-list-item">
+                  <div class="chat-person">
+                    <div class="chat-name">{{ other.get_full_name|default:other.email }}</div>
+                    <div class="chat-email">{{ other.email }}</div>
+                  </div>
+                  <div class="chat-actions">
+                    <a class="btn btn-primary" href="{% url 'chat:room' f.id %}">Отвори</a>
+                  </div>
+                </div>
+              </li>
+            {% endwith %}
+          {% endif %}
+        {% empty %}
+          <li><p class="chat-empty">Още нямаш активни чатове.</p></li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    {% if pending_in %}
+      <div class="card chat-section">
+        <h2 class="chat-panel-title">Входящи заявки</h2>
+        <ul class="chat-list">
+          {% for f in pending_in %}
+            <li>
+              <div class="chat-list-item">
+                <div class="chat-person">
+                  <div class="chat-name">{{ f.from_user.get_full_name|default:f.from_user.email }}</div>
+                  <div class="chat-email">{{ f.from_user.email }}</div>
+                </div>
+                <div class="chat-actions">
+                  <form method="post" action="{% url 'chat:accept_contact' f.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">Приеми</button>
+                  </form>
+                  <form method="post" action="{% url 'chat:decline_contact' f.pk %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-secondary">Откажи</button>
+                  </form>
+                </div>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    {% if pending_out %}
+      <div class="card chat-section">
+        <h2 class="chat-panel-title">Чакащи отговор</h2>
+        <ul class="chat-list">
+          {% for f in pending_out %}
+            <li>
+              <div class="chat-list-item">
+                <div class="chat-person">
+                  <div class="chat-name">{{ f.to_user.get_full_name|default:f.to_user.email }}</div>
+                  <div class="chat-email">{{ f.to_user.email }}</div>
+                </div>
+                <div class="chat-email">Заявката е изпратена.</div>
+              </div>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}
+

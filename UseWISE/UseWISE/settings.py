@@ -31,14 +31,17 @@ ALLOWED_HOSTS = ["localhost", "127.0.0.1", "testserver"]
 # Application definition
 
 INSTALLED_APPS = [
+    'daphne',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'channels',
     'debug_toolbar',
     'accounts',
+    'chat',
     'items',
     'rentals',
 ]
@@ -72,6 +75,13 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'UseWISE.wsgi.application'
+ASGI_APPLICATION = 'UseWISE.asgi.application'
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    }
+}
 
 
 # Database
