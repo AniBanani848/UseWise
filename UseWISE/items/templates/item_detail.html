@@ -15,6 +15,12 @@
     <p><strong>Собственик:</strong> {{ item.owner.first_name }} {{ item.owner.last_name }}</p>
     <p><strong>Телефон:</strong> {{ item.owner.phone }}</p>
     <p><strong>Населено място:</strong> {{ item.owner.city_or_village }}, {{ item.owner.country }}</p>
+    {% if user.is_authenticated and user != item.owner %}
+      <form method="post" action="{% url 'chat:start_direct' item.owner.id %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-secondary">Пиши на собственика</button>
+      </form>
+    {% endif %}
 
     {% if item.available %}
       <p style="color: green;"><strong>Статус:</strong> Вещта е обявена за наемане.</p>

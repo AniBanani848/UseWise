@@ -15,6 +15,10 @@
             <p><strong>Статус:</strong> {{ rental.get_status_display }}</p>
             <p><strong>Обща цена:</strong> {{ rental.total_price }} лв.</p>
             <p><a href="{% url 'item_detail' rental.item.id %}">Към вещта</a></p>
+            <form method="post" action="{% url 'chat:start_direct' rental.item.owner.id %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-secondary">Пиши на собственика</button>
+            </form>
             {% if rental.status == "pending" %}
               <form method="post" action="{% url 'rentals:cancel' rental.id %}">
                 {% csrf_token %}
@@ -41,6 +45,10 @@
             <p><strong>Период:</strong> {{ rental.start_date }} - {{ rental.end_date }}</p>
             <p><strong>Статус:</strong> {{ rental.get_status_display }}</p>
             <p><strong>Обща цена:</strong> {{ rental.total_price }} лв.</p>
+            <form method="post" action="{% url 'chat:start_direct' rental.renter.id %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-secondary">Пиши на наемателя</button>
+            </form>
             {% if rental.status == "pending" %}
               <form method="post" action="{% url 'rentals:approve' rental.id %}">
                 {% csrf_token %}

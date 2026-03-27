@@ -18,6 +18,38 @@ def _friendship_between(user_a, user_b):
     ).first()
 
 
+def _start_or_open_chat(request, other, *, auto_accept=False):
+    existing = _friendship_between(request.user, other)
+    if existing:
+        if existing.status == Friendship.Status.ACCEPTED:
+            messages.info(request, "Този чат вече е активен.")
+            return redirect("chat:room", friendship_id=existing.pk)
+
+        if auto_accept or existing.to_user_id == request.user.pk:
+            existing.status = Friendship.Status.ACCEPTED
+            existing.save(update_fields=["status"])
+            messages.success(
+                request,
+                f"Чатът с {other.email} е активиран. Можеш да пишеш веднага.",
+            )
+            return redirect("chat:room", friendship_id=existing.pk)
+
+        messages.info(request, "Вече си изпратил заявка за чат.")
+        return redirect("chat:list")
+
+    friendship = Friendship.objects.create(
+        from_user=request.user,
+        to_user=other,
+        status=Friendship.Status.ACCEPTED if auto_accept else Friendship.Status.PENDING,
+    )
+    if auto_accept:
+        messages.success(request, f"Чатът с {other.email} е отворен.")
+        return redirect("chat:room", friendship_id=friendship.pk)
+
+    messages.success(request, f"Изпрати заявка за чат до {other.email}.")
+    return redirect("chat:list")
+
+
 @login_required
 def contact_list(request):
     friendships = (
@@ -64,31 +96,18 @@ def add_contact(request):
         messages.error(request, "Не можеш да започнеш чат със себе си.")
         return redirect("chat:list")
 
-    existing = _friendship_between(request.user, other)
-    if existing:
-        if existing.status == Friendship.Status.ACCEPTED:
-            messages.info(request, "Този чат вече е активен.")
-            return redirect("chat:room", friendship_id=existing.pk)
+    return _start_or_open_chat(request, other)
 
-        if existing.to_user_id == request.user.pk:
-            existing.status = Friendship.Status.ACCEPTED
-            existing.save(update_fields=["status"])
-            messages.success(
-                request,
-                f"Чатът с {other.email} е активиран. Можеш да пишеш веднага.",
-            )
-            return redirect("chat:room", friendship_id=existing.pk)
 
-        messages.info(request, "Вече си изпратил заявка за чат.")
+@login_required
+@require_POST
+def start_direct_chat(request, user_id):
+    other = get_object_or_404(User, pk=user_id)
+    if other.pk == request.user.pk:
+        messages.error(request, "Не можеш да започнеш чат със себе си.")
         return redirect("chat:list")
 
-    Friendship.objects.create(
-        from_user=request.user,
-        to_user=other,
-        status=Friendship.Status.PENDING,
-    )
-    messages.success(request, f"Изпрати заявка за чат до {other.email}.")
-    return redirect("chat:list")
+    return _start_or_open_chat(request, other, auto_accept=True)
 
 
 @login_required
@@ -146,4 +165,3 @@ def chat_room(request, friendship_id):
             "chat_messages": chat_messages,
         },
     )
-

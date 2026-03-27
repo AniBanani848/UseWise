@@ -73,6 +73,17 @@ class ChatFlowTests(TestCase):
         self.assertRedirects(response, reverse("chat:room", args=[friendship.pk]))
         self.assertEqual(friendship.status, Friendship.Status.ACCEPTED)
 
+    def test_direct_start_opens_chat_immediately(self):
+        self.client.force_login(self.alice)
+
+        response = self.client.post(
+            reverse("chat:start_direct", args=[self.bob.pk]),
+        )
+
+        friendship = Friendship.objects.get()
+        self.assertRedirects(response, reverse("chat:room", args=[friendship.pk]))
+        self.assertEqual(friendship.status, Friendship.Status.ACCEPTED)
+
     def test_only_participants_can_open_chat_room(self):
         friendship = Friendship.objects.create(
             from_user=self.alice,
@@ -84,4 +95,3 @@ class ChatFlowTests(TestCase):
         response = self.client.get(reverse("chat:room", args=[friendship.pk]))
 
         self.assertEqual(response.status_code, 403)
-
