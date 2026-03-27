@@ -1,11 +1,16 @@
 <!doctype html>
-<html lang="bg">
+<html lang="bg" class="dark-mode">
 <head>
+  {% load static %}   
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{% block title %}UseWISE{% endblock %}</title>
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+  
+
 
   <style>
     :root {
@@ -55,9 +60,15 @@
       font-size: 20px;
     }
 
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: nowrap;
+    }
+
     .nav-links a,
     .nav-links button.nav-link-btn {
-      margin-left: 16px;
       text-decoration: none;
       font-weight: 600;
       background: none;
@@ -67,6 +78,7 @@
       font-family: inherit;
       font-size: inherit;
       transition: 0.2s;
+      white-space: nowrap;
     }
 
     .nav-links a:hover,
@@ -185,6 +197,128 @@
     .messages .warning {
       background: #fef3c7;
       color: #92400e;
+    }
+
+
+        /* HERO SECTION */
+    .hero {
+      min-height: 90vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #f5f7fa, #4d5b6f);
+      text-align: center;
+      padding: 20px;
+    }
+
+    /* DARK MODE */
+    .dark-mode {
+      --bg: #0f172a;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --card: #1e293b;
+      --border: #334155;
+      --primary: #3b82f6;
+      --primary-dark: #1d4ed8;
+      background: #0f172a;
+      color: #e2e8f0;
+    }
+
+    .dark-mode .navbar {
+      background: rgba(15,23,42,0.95);
+      border-color: #334155;
+    }
+
+    .dark-mode .card {
+      background: #1e293b;
+      border-color: #334155;
+    }
+
+    .dark-mode .btn.secondary {
+      background: #0f172a;
+      color: #e2e8f0;
+      border-color: #475569;
+    }
+
+    .dark-mode .form-input {
+      background: #0f172a;
+      color: #e2e8f0;
+      border-color: #334155;
+    }
+
+    .hero-container {
+      max-width: 700px;
+    }
+
+    /* TITLE */
+    .hero-title {
+      font-size: 56px;
+      font-weight: 800;
+      margin-bottom: 10px;
+      color: #1a202c;
+    }
+
+    /* SUBTITLE */
+    .hero-subtitle {
+      font-size: 20px;
+      color: #4a5568;
+      margin-bottom: 20px;
+    }
+
+    /* DESCRIPTION */
+    .hero-description {
+      font-size: 18px;
+      color: #2d3748;
+      margin-bottom: 40px;
+      line-height: 1.6;
+    }
+
+    /* BUTTONS WRAPPER */
+    .hero-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+    }
+
+    /* BUTTON BASE */
+    .btn {
+      padding: 12px 24px;
+      border-radius: 12px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.25s ease;
+    }
+
+    /* PRIMARY BUTTON */
+    .btn.primary {
+      background: #2563eb;
+      color: white;
+      border: none;}
+
+    .btn.primary:hover {
+      background: #1d4ed8;
+      transform: translateY(-2px);
+    }
+
+    /* SECONDARY BUTTON */
+    .btn.secondary {
+      background: white;
+      border: 1px solid #cbd5e0;
+      color: #2d3748;
+    }
+
+    .btn.secondary:hover {
+      background: #f7fafc;
+      border-color: #a0aec0;}
+
+    /* GHOST BUTTON */
+    .btn.ghost {
+      color: #4a5568;
+    }
+
+    .btn.ghost:hover {
+      text-decoration: underline;
     }
   </style>
 
