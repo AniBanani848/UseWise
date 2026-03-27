@@ -19,6 +19,8 @@ ENV/
 *.log
 *.pot
 *.pyc
+*.sqlite3
+db.sqlite3
 UseWISE/usewise.db
 
 # Static & media (generated files)
