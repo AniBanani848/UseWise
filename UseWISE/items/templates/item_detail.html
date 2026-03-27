@@ -12,6 +12,11 @@
     <p>{{ item.description }}</p>
 
     <p><strong>Цена на ден:</strong> {{ item.price_per_day }} лв.</p>
+    {% if review_summary.review_count %}
+      <p><strong>Рейтинг:</strong> {{ review_summary.average_rating|floatformat:1 }}/5 от {{ review_summary.review_count }} отзива</p>
+    {% else %}
+      <p><strong>Рейтинг:</strong> Все още няма отзиви</p>
+    {% endif %}
     <p><strong>Собственик:</strong> {{ item.owner.first_name }} {{ item.owner.last_name }}</p>
     <p><strong>Телефон:</strong> {{ item.owner.phone }}</p>
     <p><strong>Населено място:</strong> {{ item.owner.city_or_village }}, {{ item.owner.country }}</p>
@@ -57,6 +62,40 @@
         {{ rental_form.as_p }}
         <button type="submit" class="btn btn-primary">Изпрати заявка</button>
       </form>
+    {% endif %}
+  </section>
+
+  <section class="card">
+    <h2>Отзиви</h2>
+    {% if reviews %}
+      {% for review in reviews %}
+        <article style="padding: 12px 0; border-bottom: 1px solid #e5e7eb;">
+          <p><strong>{{ review.author.first_name }} {{ review.author.last_name }}</strong> оцени с {{ review.rating }}/5</p>
+          <p>{{ review.comment }}</p>
+          <small>{{ review.created_at|date:"d.m.Y H:i" }}</small>
+        </article>
+      {% endfor %}
+    {% else %}
+      <p>Все още няма публикувани отзиви за тази вещ.</p>
+    {% endif %}
+  </section>
+
+  <section class="card form-errors">
+    <h2>Остави отзив</h2>
+    {% if not user.is_authenticated %}
+      <p>За да оставиш отзив, първо <a href="{% url 'accounts:login' %}">влез в профила си</a>.</p>
+    {% elif user == item.owner %}
+      <p>Не можеш да оценяваш собствената си вещ.</p>
+    {% elif can_review %}
+      <form method="post" action="{% url 'add_review' item.id %}">
+        {% csrf_token %}
+        {{ review_form.as_p }}
+        <button type="submit" class="btn btn-primary">Публикувай отзив</button>
+      </form>
+    {% elif has_user_review %}
+      <p>Вече си оставил отзив за тази вещ.</p>
+    {% else %}
+      <p>Можеш да оставиш отзив само след приключил одобрен наем.</p>
     {% endif %}
   </section>
 {% endblock %}
