@@ -1,0 +1,248 @@
+{% extends "base.html" %}
+
+{% block title %}Чат с {{ other_user.get_full_name|default:other_user.email }} | UseWISE{% endblock %}
+
+{% block extra_css %}
+<style>
+  .chat-room-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .chat-room-title {
+    margin: 0 0 4px;
+  }
+  .chat-back {
+    color: var(--primary);
+    text-decoration: none;
+  }
+  .chat-status {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 700;
+    background: #e5e7eb;
+    color: #374151;
+  }
+  .chat-status.live {
+    background: #dcfce7;
+    color: #166534;
+  }
+  .chat-status.offline {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+  .chat-log {
+    min-height: 340px;
+    max-height: 60vh;
+    overflow-y: auto;
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+  }
+  .chat-row {
+    display: flex;
+    margin-bottom: 10px;
+  }
+  .chat-row.me {
+    justify-content: flex-end;
+  }
+  .chat-row.them {
+    justify-content: flex-start;
+  }
+  .chat-bubble {
+    max-width: min(72%, 560px);
+    border-radius: 14px;
+    padding: 12px 14px;
+    word-break: break-word;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+  }
+  .chat-bubble.me {
+    background: var(--primary);
+    color: #fff;
+  }
+  .chat-bubble.them {
+    background: #e9efff;
+    color: var(--text);
+  }
+  .chat-author {
+    font-size: 13px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .chat-meta {
+    margin-top: 6px;
+    font-size: 12px;
+    opacity: 0.8;
+  }
+  .chat-empty {
+    margin: 0;
+    color: var(--muted);
+  }
+  .chat-compose {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+  }
+  .chat-compose input {
+    flex: 1 1 auto;
+    min-width: 0;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font: inherit;
+  }
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  @media (max-width: 700px) {
+    .chat-room-header {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+    .chat-bubble {
+      max-width: 88%;
+    }
+    .chat-compose {
+      flex-direction: column;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="chat-room-header">
+  <div>
+    <h1 class="chat-room-title">{{ other_user.get_full_name|default:other_user.email }}</h1>
+    <a class="chat-back" href="{% url 'chat:list' %}">&larr; Обратно към чатовете</a>
+  </div>
+  <span class="chat-status" id="ws-status">Свързване...</span>
+</div>
+
+<section class="card">
+  <div class="chat-log" id="chat-log">
+    {% for m in chat_messages %}
+      <div class="chat-row {% if m.sender_id == user.id %}me{% else %}them{% endif %}">
+        <div class="chat-bubble {% if m.sender_id == user.id %}me{% else %}them{% endif %}">
+          <div class="chat-author">{{ m.sender.get_full_name|default:m.sender.email }}</div>
+          <div>{{ m.body|linebreaksbr }}</div>
+          <div class="chat-meta">{{ m.created_at|date:"d.m.Y H:i" }}</div>
+        </div>
+      </div>
+    {% empty %}
+      <p class="chat-empty" id="empty-hint">Още няма съобщения. Напиши първото.</p>
+    {% endfor %}
+  </div>
+
+  <form id="chat-form" class="chat-compose" autocomplete="off">
+    {% csrf_token %}
+    <label for="chat-input" class="visually-hidden">Съобщение</label>
+    <input id="chat-input" type="text" maxlength="2000" placeholder="Напиши съобщение..." required />
+    <button type="submit" class="btn btn-primary">Изпрати</button>
+  </form>
+</section>
+
+{{ friendship.id|json_script:"friendship-id" }}
+{{ user.id|json_script:"current-user-id" }}
+
+<script>
+  (function () {
+    const friendshipId = JSON.parse(document.getElementById("friendship-id").textContent);
+    const currentUserId = JSON.parse(document.getElementById("current-user-id").textContent);
+    const logEl = document.getElementById("chat-log");
+    const statusEl = document.getElementById("ws-status");
+    const form = document.getElementById("chat-form");
+    const input = document.getElementById("chat-input");
+    const emptyHint = document.getElementById("empty-hint");
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const socket = new WebSocket(protocol + "//" + window.location.host + "/ws/chat/" + friendshipId + "/");
+
+    function appendMessage(payload) {
+      if (emptyHint) {
+        emptyHint.remove();
+      }
+
+      const row = document.createElement("div");
+      row.className = "chat-row " + (payload.sender_id === currentUserId ? "me" : "them");
+
+      const bubble = document.createElement("div");
+      bubble.className = "chat-bubble " + (payload.sender_id === currentUserId ? "me" : "them");
+
+      const author = document.createElement("div");
+      author.className = "chat-author";
+      author.textContent = payload.username;
+
+      const body = document.createElement("div");
+      body.textContent = payload.body;
+
+      const meta = document.createElement("div");
+      meta.className = "chat-meta";
+      meta.textContent = new Date(payload.created_at).toLocaleString();
+
+      bubble.appendChild(author);
+      bubble.appendChild(body);
+      bubble.appendChild(meta);
+      row.appendChild(bubble);
+      logEl.appendChild(row);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    socket.onopen = function () {
+      statusEl.textContent = "Онлайн";
+      statusEl.classList.add("live");
+      statusEl.classList.remove("offline");
+    };
+
+    socket.onclose = function () {
+      statusEl.textContent = "Изключен";
+      statusEl.classList.add("offline");
+      statusEl.classList.remove("live");
+    };
+
+    socket.onerror = function () {
+      statusEl.textContent = "Грешка";
+      statusEl.classList.add("offline");
+      statusEl.classList.remove("live");
+    };
+
+    socket.onmessage = function (event) {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === "message") {
+          appendMessage(data);
+        }
+      } catch (error) {
+      }
+    };
+
+    form.addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      const text = input.value.trim();
+      if (!text || socket.readyState !== WebSocket.OPEN) {
+        return;
+      }
+
+      socket.send(JSON.stringify({ message: text }));
+      input.value = "";
+      input.focus();
+    });
+
+    logEl.scrollTop = logEl.scrollHeight;
+  })();
+</script>
+{% endblock %}

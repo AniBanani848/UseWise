@@ -1,19 +1,62 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h2>{{ item.title }}</h2>
-    
+  <section class="card">
+    <h1>{{ item.title }}</h1>
+
     {% if item.image %}
-        <img src="{{ item.image.url }}" alt="{{ item.title }}" style="max-width: 300px; border-radius: 8px;">
+      <img src="{{ item.image.url }}" alt="{{ item.title }}" style="max-width: 300px; width: 100%; border-radius: 8px; margin-bottom: 16px;">
     {% endif %}
 
     <p><strong>Описание:</strong></p>
     <p>{{ item.description }}</p>
-    
-    <p><strong>Цена на ден:</strong> {{ item.price_per_day }} лв.</p>
-    <p><strong>Собственик:</strong> {{ item.owner.username }}</p>
 
-    <button style="padding: 10px 20px; background-color: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">
-        Свържи се със собственика
-    </button>
+    <p><strong>Цена на ден:</strong> {{ item.price_per_day }} лв.</p>
+    <p><strong>Собственик:</strong> {{ item.owner.first_name }} {{ item.owner.last_name }}</p>
+    <p><strong>Телефон:</strong> {{ item.owner.phone }}</p>
+    <p><strong>Населено място:</strong> {{ item.owner.city_or_village }}, {{ item.owner.country }}</p>
+    {% if user.is_authenticated and user != item.owner %}
+      <form method="post" action="{% url 'chat:start_direct' item.owner.id %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-secondary">Пиши на собственика</button>
+      </form>
+    {% endif %}
+
+    {% if item.available %}
+      <p style="color: green;"><strong>Статус:</strong> Вещта е обявена за наемане.</p>
+    {% else %}
+      <p style="color: #991b1b;"><strong>Статус:</strong> Вещта не приема нови наеми в момента.</p>
+    {% endif %}
+  </section>
+
+  <section class="card">
+    <h2>Заети периоди</h2>
+    {% if approved_rentals %}
+      <p>Не можеш да заявиш наем за дати, които се припокриват със следните одобрени периоди:</p>
+      <ul>
+        {% for rental in approved_rentals %}
+          <li>{{ rental.start_date }} - {{ rental.end_date }}{% if rental.is_current %} (в момента е нает){% endif %}</li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>В момента няма одобрени наеми за тази вещ.</p>
+    {% endif %}
+  </section>
+
+  <section class="card form-errors">
+    <h2>Заяви наем</h2>
+    {% if not user.is_authenticated %}
+      <p>За да заявиш наем, първо <a href="{% url 'accounts:login' %}">влез в профила си</a>.</p>
+    {% elif user == item.owner %}
+      <p>Това е твоя вещ, затова не можеш да подадеш заявка за нея.</p>
+    {% elif not item.available %}
+      <p>Собственикът временно е спрял новите заявки за тази вещ.</p>
+    {% else %}
+      <form method="post" action="{% url 'rentals:create' item.id %}">
+        {% csrf_token %}
+        {{ rental_form.as_p }}
+        <button type="submit" class="btn btn-primary">Изпрати заявка</button>
+      </form>
+    {% endif %}
+  </section>
 {% endblock %}
