@@ -1,3 +1,4 @@
+from django.db.models import Q
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from .forms import ItemForm
@@ -20,8 +21,13 @@ def add_item(request):
     return render(request, 'add_item.html', {'form': form})
 
 def item_list(request):
+    query = request.GET.get('q', '').strip()
     items = Item.objects.all()
-    return render(request, 'item_list.html', {'items': items})
+    if query:
+        items = items.filter(
+            Q(title__icontains=query) | Q(description__icontains=query)
+        )
+    return render(request, 'item_list.html', {'items': items, 'query': query})
 
 def item_detail(request, item_id):
     item = get_object_or_404(Item, id=item_id)
