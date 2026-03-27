@@ -19,7 +19,8 @@ def add_item(request):
             item = form.save(commit=False)
             item.owner = request.user
             item.save()
-            return redirect('home')
+            messages.success(request, "Вещта беше добавена успешно.")
+            return redirect('item_detail', item_id=item.id)
     else:
         form = ItemForm()
 
@@ -30,7 +31,7 @@ def item_list(request):
     items = Item.objects.annotate(
         average_rating=Avg("reviews__rating"),
         review_count=Count("reviews"),
-    )
+    ).select_related("owner").order_by("-id")
     if query:
         items = items.filter(
             Q(title__icontains=query) | Q(description__icontains=query)

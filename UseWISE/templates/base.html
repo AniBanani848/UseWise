@@ -16,6 +16,8 @@
       --primary-dark: #1d4ed8;
       --text-main: #1f2937;
       --text-muted: #6b7280;
+      --text: var(--text-main);
+      --muted: var(--text-muted);
       --border: #d6dfef;
       --surface: rgba(255, 255, 255, 0.9);
       --surface-soft: rgba(248, 251, 255, 0.94);
@@ -89,6 +91,12 @@
       color: #fff !important;
       background: rgba(255, 255, 255, 0.10);
       transform: translateY(-1px);
+    }
+
+    .navbar .nav-link.active-link {
+      color: #fff !important;
+      background: rgba(255, 255, 255, 0.16);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.12);
     }
 
     .navbar-nav {
@@ -291,6 +299,21 @@
       .navbar {
         border-radius: 18px;
       }
+
+      .navbar-nav {
+        flex-wrap: wrap !important;
+        margin-top: 0.8rem;
+      }
+
+      .navbar-nav form {
+        margin-left: 0;
+        width: 100%;
+      }
+
+      .navbar-nav form .form-control {
+        max-width: none;
+        width: 100%;
+      }
     }
   </style>
 
@@ -311,7 +334,7 @@
 
         <div class="collapse navbar-collapse" id="mainNav">
           <div class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
-            <a class="nav-link" href="{% url 'item_list' %}">Предмети</a>
+            <a class="nav-link {% if request.path == '/items/' %}active-link{% endif %}" href="{% url 'item_list' %}">Предмети</a>
 
             <form method="get" action="{% url 'item_list' %}" class="d-flex align-items-center ms-2">
               <input
@@ -326,12 +349,13 @@
             </form>
 
             {% if user.is_authenticated %}
-              <a class="nav-link" href="{% url 'add_item' %}">Добави</a>
-              <a class="nav-link" href="{% url 'rentals:dashboard' %}">Наеми</a>
-              <a class="nav-link" href="{% url 'accounts:profile' %}">Профил</a>
+              <a class="nav-link {% if request.path == '/items/add/' %}active-link{% endif %}" href="{% url 'add_item' %}">Добави</a>
+              <a class="nav-link {% if request.path == '/rentals/' %}active-link{% endif %}" href="{% url 'rentals:dashboard' %}">Наеми</a>
+              <a class="nav-link {% if request.path == '/chat/' or '/chat/room/' in request.path %}active-link{% endif %}" href="{% url 'chat:list' %}">Чат</a>
+              <a class="nav-link {% if request.path == '/accounts/profile/' %}active-link{% endif %}" href="{% url 'accounts:profile' %}">Профил</a>
 
               <span class="nav-user-pill d-none d-lg-inline">
-                {{ user.username }}
+                {{ user.first_name|default:user.username }}
               </span>
 
               <form action="{% url 'accounts:logout' %}" method="post" class="d-flex align-items-center ms-lg-2">
@@ -341,7 +365,7 @@
                 </button>
               </form>
             {% else %}
-              <a class="nav-link" href="{% url 'accounts:login' %}">Вход</a>
+              <a class="nav-link {% if request.path == '/accounts/login/' %}active-link{% endif %}" href="{% url 'accounts:login' %}">Вход</a>
               <a class="btn btn-light btn-sm text-primary" href="{% url 'accounts:signup' %}">
                 Регистрация
               </a>
