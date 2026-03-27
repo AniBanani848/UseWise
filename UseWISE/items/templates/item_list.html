@@ -1,12 +1,19 @@
 {%extends "base.html"%}
 {% block content %}
     <h2>Налични предмети за наемане</h2>
-    
+    {% if query %}
+        <p>Резултати за търсене: "{{ query }}" ({{ items.count }} предмет(а)).</p>
+    {% endif %}
     <div style="display: flex; gap: 20px; flex-wrap: wrap;">
         {% for item in items %}
             <div style="border: 1px solid #ccc; padding: 15px; border-radius: 8px; width: 200px;">
                 <h3>{{ item.title }}</h3>
                 <p><strong>Цена на ден:</strong> {{ item.price_per_day }} лв.</p>
+                {% if item.review_count %}
+                    <p><strong>Рейтинг:</strong> {{ item.average_rating|floatformat:1 }}/5 ({{ item.review_count }} отзива)</p>
+                {% else %}
+                    <p><strong>Рейтинг:</strong> Все още няма отзиви</p>
+                {% endif %}
                 
                 {% if item.available %}
                     <p style="color: green;">Свободен</p>

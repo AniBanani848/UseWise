@@ -1,18 +1,18 @@
 <!doctype html>
 <html lang="bg" class="dark-mode">
 <head>
-  {% load static %}   
+  {% load static %}
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>{% block title %}UseWISE{% endblock %}</title>
+  {% block extra_head %}{% endblock %}
 
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="{% static 'css/style.css' %}">
-  
-
 
   <style>
+    /* === CSS VARIABLES (light mode defaults) === */
     :root {
       --bg: #f5f7fb;
       --text: #1f2937;
@@ -21,14 +21,91 @@
       --primary-dark: #1d4ed8;
       --card: #ffffff;
       --border: #e5e7eb;
+      --accent: #bec8d4;
+      --accent-soft: #eef2ff;
+      --text-main: #1f2937;
+      --text-muted: #6b7280;
+      --surface: rgba(255, 255, 255, 0.92);
+      --shadow: 0 20px 50px rgba(15, 23, 42, 0.10);
+      --shadow-soft: 0 12px 30px rgba(37, 99, 235, 0.14);
     }
+
+    /* === DARK MODE VARIABLES === */
+    html.dark-mode {
+      --bg: #0f172a;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --primary: #3b82f6;
+      --primary-dark: #1d4ed8;
+      --card: #1e293b;
+      --border: #334155;
+      --text-main: #e2e8f0;
+      --text-muted: #94a3b8;
+      --surface: rgba(30, 41, 59, 0.97);
+      --accent-soft: #1e293b;
+    }
+
+    * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      font-family: 'Inter', sans-serif;
-      background: var(--bg);
-      color: var(--text);
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      color: var(--text-main);
       line-height: 1.6;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.14), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(96, 165, 250, 0.12), transparent 30%),
+        linear-gradient(180deg, #f8fbff 0%, #eef4ff 100%);
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    html.dark-mode body {
+      background:
+        radial-gradient(circle at top left, rgba(59, 130, 246, 0.10), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(30, 58, 138, 0.12), transparent 30%),
+        linear-gradient(180deg, #0f172a 0%, #0b1120 100%);
+      color: #e2e8f0;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(70px);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    body::before {
+      width: 240px; height: 240px;
+      top: 20px; left: -80px;
+      background: rgba(37, 99, 235, 0.12);
+    }
+
+    body::after {
+      width: 220px; height: 220px;
+      right: -60px; bottom: 40px;
+      background: rgba(14, 165, 233, 0.10);
+    }
+
+    html.dark-mode body::before {
+      background: rgba(59, 130, 246, 0.08);
+    }
+
+    html.dark-mode body::after {
+      background: rgba(30, 58, 138, 0.10);
+    }
+
+    /* === LAYOUT === */
+    .page-shell {
+      max-width: 1120px;
+      margin: 24px auto;
+      padding: 0 14px;
+      position: relative;
+      z-index: 1;
     }
 
     .container {
@@ -37,85 +114,143 @@
       padding: 10px;
     }
 
-    /* NAVBAR */
+    /* === NAVBAR === */
     .navbar {
-      position: sticky;
-      top: 0;
-      background: rgba(255,255,255,1);
-      border-bottom: 1px solid var(--border);
-      z-index: 100;
-      padding: 12px 0;
+      border-radius: 22px;
+      padding: 0.9rem 1.1rem;
+      margin-bottom: 1.4rem;
+      background: linear-gradient(135deg, rgba(37, 99, 235, 0.96), rgba(29, 78, 216, 0.92));
+      backdrop-filter: blur(14px);
+      box-shadow: 0 14px 34px rgba(37, 99, 235, 0.22);
+      border: 1px solid rgba(255,255,255,0.14);
     }
 
-    .navbar-inner {
+    html.dark-mode .navbar {
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.97), rgba(30, 41, 59, 0.95));
+      border-color: #334155;
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.4);
+    }
+
+    .navbar-brand {
+      color: #fff !important;
+      font-weight: 800;
+      font-size: 1.2rem;
+      letter-spacing: 0.3px;
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      gap: 0.6rem;
     }
 
-    .brand {
+    .brand-badge {
+      width: 36px; height: 36px;
+      border-radius: 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,0.15);
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.18);
+      font-size: 1rem;
+    }
+
+    .navbar .nav-link {
+      color: rgba(255, 255, 255, 0.92) !important;
+      font-weight: 600;
+      padding: 0.55rem 0.85rem;
+      border-radius: 12px;
+      transition: 0.22s ease;
+    }
+
+    .navbar .nav-link:hover {
+      color: #fff !important;
+      background: rgba(255,255,255,0.10);
+      transform: translateY(-1px);
+    }
+
+    .nav-user-pill {
+      background: rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.95);
+      padding: 0.45rem 0.85rem;
+      border-radius: 999px;
+      font-size: 0.86rem;
+      font-weight: 600;
+    }
+
+    /* === MAIN CARD === */
+    .main-card {
+      background: var(--surface);
+      backdrop-filter: blur(14px);
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      border-radius: 28px;
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .main-card::before {
+      content: "";
+      position: absolute;
+      inset: 0 auto auto 0;
+      width: 100%;
+      height: 5px;
+      background: linear-gradient(90deg, #2563eb, #60a5fa, #0ea5e9);
+    }
+
+    html.dark-mode .main-card {
+      background: rgba(30, 41, 59, 0.97);
+      border-color: #334155;
+    }
+
+    /* === TYPOGRAPHY === */
+    .content-title {
+      font-size: 1.95rem;
+      font-weight: 800;
+      margin-bottom: 0.35rem;
+      letter-spacing: -0.02em;
+    }
+
+    .content-subtitle {
+      color: var(--text-muted);
+      margin-bottom: 1.5rem;
+      font-size: 1rem;
+    }
+
+    .section-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.42rem 0.8rem;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--primary-dark);
+      font-size: 0.86rem;
       font-weight: 700;
-      text-decoration: none;
-      color: var(--text);
-      font-size: 20px;
+      margin-bottom: 0.9rem;
     }
 
-    .nav-links {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-      flex-wrap: nowrap;
-    }
-
-    .nav-links a,
-    .nav-links button.nav-link-btn {
-      text-decoration: none;
-      font-weight: 600;
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: var(--muted);
-      font-family: inherit;
-      font-size: inherit;
-      transition: 0.2s;
-      white-space: nowrap;
-    }
-
-    .nav-links a:hover,
-    .nav-links button.nav-link-btn:hover {
-      color: var(--primary);
-    }
-
-    .nav-links a:focus,
-    .nav-links button:focus {
-      outline: none;
-    }
-
-    /* MAIN */
-    .page-main {
-      padding: 30px 0;
-    }
-
-    /* BUTTONS */
+    /* === BUTTONS === */
     .btn {
-      padding: 10px 16px;
-      border-radius: 8px;
       font-weight: 600;
-      margin-bottom: 8px;
       cursor: pointer;
-      transition: all 0.2s ease;
+      transition: all 0.22s ease;
       display: inline-block;
       text-decoration: none;
     }
 
     .btn-primary {
-      background: var(--primary);
-      color: #fff;
+      background: linear-gradient(135deg, var(--primary), var(--primary-dark));
       border: none;
+      border-radius: 14px;
+      padding: 0.78rem 1.05rem;
+      font-weight: 700;
+      box-shadow: var(--shadow-soft);
+      color: #fff;
     }
 
     .btn-primary:hover {
-      background: var(--primary-dark);
+      background: linear-gradient(135deg, var(--primary-dark), #1e40af);
+      transform: translateY(-2px);
+      box-shadow: 0 16px 32px rgba(37, 99, 235, 0.22);
     }
 
     .btn-secondary {
@@ -124,7 +259,61 @@
       color: var(--text);
     }
 
-    /* CARD */
+    .btn-light, .btn-outline-light {
+      border-radius: 12px;
+      font-weight: 700;
+    }
+
+    .btn-light:hover, .btn-outline-light:hover {
+      transform: translateY(-1px);
+    }
+
+    /* Hero button variants (used in home.html) */
+    .btn.primary {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      border-radius: 12px;
+    }
+
+    .btn.primary:hover {
+      background: #1d4ed8;
+      transform: translateY(-2px);
+    }
+
+    .btn.secondary {
+      background: white;
+      border: 1px solid #cbd5e0;
+      color: #2d3748;
+      padding: 12px 24px;
+      border-radius: 12px;
+    }
+
+    .btn.secondary:hover {
+      background: #f7fafc;
+      border-color: #a0aec0;
+    }
+
+    .btn.ghost {
+      color: #4a5568;
+      padding: 12px 24px;
+      border-radius: 12px;
+    }
+
+    .btn.ghost:hover { text-decoration: underline; }
+
+    html.dark-mode .btn.secondary {
+      background: #1e293b;
+      color: #e2e8f0;
+      border-color: #475569;
+    }
+
+    html.dark-mode .btn.ghost {
+      color: #94a3b8;
+    }
+
+    /* === CARD === */
     .card {
       background: var(--card);
       border-radius: 14px;
@@ -133,16 +322,15 @@
       border: 1px solid var(--border);
     }
 
-    .card a {
-      color: var(--primary);
-      text-decoration: none;
+    .card a { color: var(--primary); text-decoration: none; }
+    .card a:hover { text-decoration: underline; }
+
+    html.dark-mode .card {
+      background: #1e293b;
+      border-color: #334155;
     }
 
-    .card a:hover {
-      text-decoration: underline;
-    }
-
-    /* FORM INPUTS */
+    /* === FORMS === */
     .form-input {
       width: 100%;
       padding: 10px;
@@ -165,13 +353,45 @@
       flex-direction: column;
     }
 
-    .error {
-      color: #991b1b;
-      font-size: 13px;
-      margin-top: 4px;
+    .form-control, .form-select {
+      border-radius: 16px;
+      padding: 0.85rem 1rem;
+      border: 1px solid #dbe3ef;
+      background-color: #f8fbff;
+      transition: 0.2s ease;
     }
 
-    /* MESSAGES */
+    .form-control:hover, .form-select:hover {
+      border-color: #bfd4fb;
+      background: #ffffff;
+    }
+
+    .form-control:focus, .form-select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 0.22rem rgba(37, 99, 235, 0.14);
+      background-color: #fff;
+    }
+
+    html.dark-mode .form-input,
+    html.dark-mode .form-control,
+    html.dark-mode .form-select {
+      background: #0f172a;
+      color: #e2e8f0;
+      border-color: #334155;
+    }
+
+    html.dark-mode .form-control:focus,
+    html.dark-mode .form-select:focus {
+      background: #1e293b;
+    }
+
+    /* === ALERTS / MESSAGES === */
+    .alert {
+      border-radius: 16px;
+      border: none;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+    }
+
     .messages {
       list-style: none;
       padding: 0;
@@ -184,73 +404,28 @@
       margin-bottom: 8px;
     }
 
-    .messages .success {
-      background: #d1fae5;
-      color: #065f46;
-    }
+    .messages .success { background: #d1fae5; color: #065f46; }
+    .messages .error { background: #fee2e2; color: #991b1b; }
+    .messages .warning { background: #fef3c7; color: #92400e; }
 
-    .messages .error {
-      background: #fee2e2;
+    .error {
       color: #991b1b;
+      font-size: 13px;
+      margin-top: 4px;
     }
 
-    .messages .warning {
-      background: #fef3c7;
-      color: #92400e;
-    }
-
-
-        /* HERO SECTION */
+    /* === HERO SECTION === */
     .hero {
-      min-height: 90vh;
+      min-height: 70vh;
       display: flex;
       align-items: center;
       justify-content: center;
-      background: linear-gradient(135deg, #f5f7fa, #4d5b6f);
       text-align: center;
       padding: 20px;
     }
 
-    /* DARK MODE */
-    .dark-mode {
-      --bg: #0f172a;
-      --text: #e2e8f0;
-      --muted: #94a3b8;
-      --card: #1e293b;
-      --border: #334155;
-      --primary: #3b82f6;
-      --primary-dark: #1d4ed8;
-      background: #0f172a;
-      color: #e2e8f0;
-    }
+    .hero-container { max-width: 700px; }
 
-    .dark-mode .navbar {
-      background: rgba(15,23,42,0.95);
-      border-color: #334155;
-    }
-
-    .dark-mode .card {
-      background: #1e293b;
-      border-color: #334155;
-    }
-
-    .dark-mode .btn.secondary {
-      background: #0f172a;
-      color: #e2e8f0;
-      border-color: #475569;
-    }
-
-    .dark-mode .form-input {
-      background: #0f172a;
-      color: #e2e8f0;
-      border-color: #334155;
-    }
-
-    .hero-container {
-      max-width: 700px;
-    }
-
-    /* TITLE */
     .hero-title {
       font-size: 56px;
       font-weight: 800;
@@ -258,14 +433,12 @@
       color: #1a202c;
     }
 
-    /* SUBTITLE */
     .hero-subtitle {
       font-size: 20px;
       color: #4a5568;
       margin-bottom: 20px;
     }
 
-    /* DESCRIPTION */
     .hero-description {
       font-size: 18px;
       color: #2d3748;
@@ -273,52 +446,47 @@
       line-height: 1.6;
     }
 
-    /* BUTTONS WRAPPER */
     .hero-buttons {
-    display: flex;
-    gap: 15px;
-    justify-content: center;
-    flex-wrap: wrap;
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
     }
 
-    /* BUTTON BASE */
-    .btn {
-      padding: 12px 24px;
-      border-radius: 12px;
-      font-weight: 600;
-      text-decoration: none;
-      transition: all 0.25s ease;
+    html.dark-mode .hero-title { color: #e2e8f0; }
+    html.dark-mode .hero-subtitle { color: #94a3b8; }
+    html.dark-mode .hero-description { color: #cbd5e0; }
+
+    /* === FOOTER === */
+    .footer-note {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.92rem;
+      margin-top: 1rem;
     }
 
-    /* PRIMARY BUTTON */
-    .btn.primary {
-      background: #2563eb;
-      color: white;
-      border: none;}
+    /* === RESPONSIVE === */
+    @media (max-width: 768px) {
+      .main-card {
+        padding: 1.25rem;
+        border-radius: 22px;
+      }
 
-    .btn.primary:hover {
-      background: #1d4ed8;
-      transform: translateY(-2px);
-    }
+      .page-shell {
+        margin: 14px auto;
+      }
 
-    /* SECONDARY BUTTON */
-    .btn.secondary {
-      background: white;
-      border: 1px solid #cbd5e0;
-      color: #2d3748;
-    }
+      .content-title {
+        font-size: 1.6rem;
+      }
 
-    .btn.secondary:hover {
-      background: #f7fafc;
-      border-color: #a0aec0;}
+      .navbar {
+        border-radius: 18px;
+      }
 
-    /* GHOST BUTTON */
-    .btn.ghost {
-      color: #4a5568;
-    }
-
-    .btn.ghost:hover {
-      text-decoration: underline;
+      .hero-title {
+        font-size: 36px;
+      }
     }
   </style>
 
@@ -326,41 +494,66 @@
 </head>
 
 <body>
-  <header class="navbar">
-    <div class="container navbar-inner">
-      <a class="brand" href="/">UseWISE</a>
+  <div class="page-shell">
+    <nav class="navbar navbar-expand-lg navbar-dark">
+      <div class="container-fluid px-1">
+        <a class="navbar-brand" href="/">
+          <span class="brand-badge">⚡</span>
+          UseWISE
+        </a>
 
-      <nav class="nav-links">
-        <a href="/">Начало</a>
-        <a href="/items/">Вещи</a>
+        <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Навигация">
+          <span class="navbar-toggler-icon"></span>
+        </button>
 
-        {% if user.is_authenticated %}
-          <a href="{% url 'accounts:profile' %}">Профил</a>
-          <form method="post" action="{% url 'accounts:logout' %}" style="display:inline;">
-            {% csrf_token %}
-            <button type="submit" class="nav-link-btn">Изход</button>
-          </form>
-        {% else %}
-          <a href="{% url 'accounts:signup' %}">Регистрация</a>
-          <a href="{% url 'accounts:login' %}">Вход</a>
-        {% endif %}
+        <div class="collapse navbar-collapse" id="mainNav">
+          <div class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+            <a class="nav-link" href="/">Начало</a>
+            <a class="nav-link" href="{% url 'item_list' %}">Предмети</a>
 
-        <a href="{% url 'item_list' %}">Всички предмети</a>
-        <a href="{% url 'add_item' %}">Добави предмет</a>
-      </nav>
-    </div>
-  </header>
+            {% if user.is_authenticated %}
+              <a class="nav-link" href="{% url 'add_item' %}">Добави</a>
+              <a class="nav-link" href="{% url 'accounts:profile' %}">Профил</a>
 
-  <main class="container page-main">
-    {% if messages %}
-      <ul class="messages">
+              <span class="nav-user-pill d-none d-lg-inline">
+                👤 {{ user.username }}
+              </span>
+
+              <form action="{% url 'accounts:logout' %}" method="post" class="d-inline">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-outline-light btn-sm ms-lg-2">
+                  Изход
+                </button>
+              </form>
+            {% else %}
+              <a class="nav-link" href="{% url 'accounts:login' %}">Вход</a>
+              <a class="btn btn-light btn-sm text-primary" href="{% url 'accounts:signup' %}">
+                Регистрация
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <div class="main-card">
+      {% if messages %}
         {% for message in messages %}
-          <li class="{{ message.tags }}">{{ message }}</li>
+          <div class="alert alert-{% if 'error' in message.tags %}danger{% elif 'success' in message.tags %}success{% elif 'warning' in message.tags %}warning{% else %}info{% endif %} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Затвори"></button>
+          </div>
         {% endfor %}
-      </ul>
-    {% endif %}
+      {% endif %}
 
-    {% block content %}{% endblock %}
-  </main>
+      {% block content %}{% endblock %}
+    </div>
+
+    <div class="footer-note">
+      UseWISE • organize smarter
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

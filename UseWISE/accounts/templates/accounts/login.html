@@ -5,6 +5,9 @@
 {% block content %}
   <section class="card form-errors">
     <h1>Вход</h1>
+    <p style="color: var(--muted); margin-top: 0;">
+      Влез с имейла и паролата си.
+    </p>
     <form method="post" action="">
       {% csrf_token %}
       {% if form.non_field_errors %}

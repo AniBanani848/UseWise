@@ -19,6 +19,7 @@ ENV/
 *.log
 *.pot
 *.pyc
+UseWISE/usewise.db
 
 # Static & media (generated files)
 staticfiles/
