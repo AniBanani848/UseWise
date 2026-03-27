@@ -29,6 +29,15 @@ class SignupForm(forms.ModelForm):
             "phone",
         )
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Add CSS classes to all fields
+        for field in self.fields.values():
+            field.widget.attrs.update({
+                'class': 'form-input',
+                'placeholder': field.label
+            })
+
     def clean_email(self):
         email = self.cleaned_data.get("email") or ""
         return email.strip().lower()
@@ -69,6 +78,14 @@ class EmailLoginForm(AuthenticationForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["username"].label = "Имейл"
+        self.fields["username"].widget.attrs.update({
+            'class': 'form-input',
+            'placeholder': 'Имейл'
+        })
+        self.fields["password"].widget.attrs.update({
+            'class': 'form-input',
+            'placeholder': 'Парола'
+        })
 
 
 class ProfileEditForm(forms.ModelForm):
