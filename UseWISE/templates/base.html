@@ -91,6 +91,29 @@
       transform: translateY(-1px);
     }
 
+    .navbar-nav {
+      flex-wrap: nowrap !important;
+      gap: 0.5rem;
+    }
+
+    .navbar-nav form {
+      display: inline-flex;
+      align-items: center;
+      margin-left: 0.6rem;
+    }
+
+    .navbar-nav form .form-control {
+      min-width: 170px;
+      max-width: 220px;
+      margin-right: 0.25rem;
+    }
+
+    .navbar-nav form .btn {
+      margin: 0;
+      min-height: 34px;
+      padding: 0.35rem 0.8rem;
+    }
+
     .nav-user-pill {
       background: rgba(255, 255, 255, 0.14);
       color: rgba(255, 255, 255, 0.95);
@@ -288,7 +311,6 @@
 
         <div class="collapse navbar-collapse" id="mainNav">
           <div class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
-            <a class="nav-link" href="/">Начало</a>
             <a class="nav-link" href="{% url 'item_list' %}">Предмети</a>
 
             <form method="get" action="{% url 'item_list' %}" class="d-flex align-items-center ms-2">
@@ -312,9 +334,9 @@
                 {{ user.username }}
               </span>
 
-              <form action="{% url 'accounts:logout' %}" method="post" class="d-inline">
+              <form action="{% url 'accounts:logout' %}" method="post" class="d-flex align-items-center ms-lg-2">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-outline-light btn-sm ms-lg-2">
+                <button type="submit" class="btn btn-outline-light btn-sm">
                   Изход
                 </button>
               </form>
